@@ -13,10 +13,10 @@ FASTBLASLIB = -L$(MKLROOT)/lib/intel64 -Wl,--start-group -lscalapack $(BLACSLIB)
 GPULIB = -L/opt/cuda/lib64 -lcublas -lcudart -lcuda
 
 CUDADIR   = /mnt/scratch/cuda
-INC       = -I$(CUDADIR)/include
+INC       = -I$(CUDADIR)/include 
 
 
-CFLAGS = -I/opt/mkl/include -I/opt/cuda/include -Wall
+CFLAGS = -I/opt/mkl/include -I/opt/cuda/include -Wall -I/home/du/lib/scalapack-1.8.0/PBLAS/SRC
 #CFLAGS += -DTIMING
 FFLAGS =  -fsecond-underscore
 
@@ -26,11 +26,12 @@ LDFLAGS =  -L$(HOME)/lib/lapack-3.3.1\
 		   -L$(HOME)/lib/BLACS/LIB 
 
 
-LINKLIB =   lu_test.o pdgeqrrv.o pdmatgen.o pmatgeninc.o pdlaprnt.o orig_pdgetrf.o gpu_pdgeqrf.o gpu_pdlarfb.o util_ft.o util_gpu.o pdgetrrv.o $(FASTBLASLIB) $(GPULIB)
+LINKLIB =   lu_test.o pdgeqrrv.o pdmatgen.o pmatgeninc.o pdlaprnt.o orig_pdgetrf.o gpu_pdgeqrf.o gpu_pdlarfb.o util_ft.o util_gpu.o pdgetrrv.o \
+			gpu_pdgetrf.o pdgemm_.o $(FASTBLASLIB) $(GPULIB)
 
 PROG = lu_test.x
 
-$(PROG) : lu_test.o pdgeqrrv.o pdmatgen.o pmatgeninc.o pdlaprnt.o util_ft.o orig_pdgetrf.o gpu_pdgeqrf.o gpu_pdlarfb.o util_gpu.o pdgetrrv.o
+$(PROG) : lu_test.o pdgeqrrv.o pdmatgen.o pmatgeninc.o pdlaprnt.o util_ft.o orig_pdgetrf.o gpu_pdgeqrf.o gpu_pdlarfb.o util_gpu.o pdgetrrv.o gpu_pdgetrf.o pdgemm_.o
 	$(FC) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(LINKLIB) 
 
 .c.o:

@@ -180,7 +180,7 @@ int main(int argc, char **argv)
 			MPI_Barrier(MPI_COMM_WORLD);
 			MPIt1 = MPI_Wtime();
 
-			pdgetrf_ (&M, &N, A, &ione, &ione, descA, ipiv, &info);
+			gpu_pdgetrf_ (&M, &N, A, &ione, &ione, descA, ipiv, &info);
 
 			MPIt2 = MPI_Wtime();
 			checkerror(info, 0);

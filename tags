@@ -73,7 +73,7 @@ A_error	util_ft.h	17;"	d
 BLACSLIB	makefile	/^BLACSLIB =  $(HOME)\/lib\/BLACS\/LIB\/blacsCinit_MPI-LINUX-0.a  $(HOME)\/lib\/BLACS\/LIB\/blacsF77init_MPI-LINUX-0.a  $(HOME)\/lib\/BLACS\/LIB\/blacs_MPI-LINUX-0.a$/;"	m
 B_error	util_ft.h	20;"	d
 CC	makefile	/^CC = mpicc $/;"	m
-CFLAGS	makefile	/^CFLAGS = -I\/opt\/mkl\/include -I\/opt\/cuda\/include -Wall$/;"	m
+CFLAGS	makefile	/^CFLAGS = -I\/opt\/mkl\/include -I\/opt\/cuda\/include -Wall -I\/home\/du\/lib\/scalapack-1.8.0\/PBLAS\/SRC$/;"	m
 CHECKSUM	util_ft.h	29;"	d
 COPY	util_ft.h	41;"	d
 CSRC_	slp.h	8;"	d
@@ -104,7 +104,7 @@ HOME	makefile	/^HOME = \/home\/du$/;"	m
 H_f	f2c.h	/^typedef VOID H_f;	\/* character function *\/$/;"	t
 H_fp	f2c.h	/^typedef \/* Character *\/ VOID (*H_fp)();$/;"	t
 H_fp	f2c.h	/^typedef \/* Character *\/ VOID (*H_fp)(...);$/;"	t
-INC	makefile	/^INC       = -I$(CUDADIR)\/include$/;"	m
+INC	makefile	/^INC       = -I$(CUDADIR)\/include $/;"	m
 ISWORKER	util_ft.h	13;"	d
 I_fp	f2c.h	/^typedef integer (*I_fp)();$/;"	t
 I_fp	f2c.h	/^typedef integer (*I_fp)(...);$/;"	t
@@ -117,7 +117,7 @@ K_fp	f2c.h	/^typedef shortlogical (*K_fp)();$/;"	t
 K_fp	f2c.h	/^typedef shortlogical (*K_fp)(...);$/;"	t
 LADD	pmatgeninc.f	/^      SUBROUTINE LADD(/;"	s
 LDFLAGS	makefile	/^LDFLAGS =  -L$(HOME)\/lib\/lapack-3.3.1\\$/;"	m
-LINKLIB	makefile	/^LINKLIB =   lu_test.o pdgeqrrv.o pdmatgen.o pmatgeninc.o pdlaprnt.o orig_pdgetrf.o gpu_pdgeqrf.o gpu_pdlarfb.o util_ft.o util_gpu.o pdgetrrv.o $(FASTBLASLIB) $(GPULIB)$/;"	m
+LINKLIB	makefile	/^LINKLIB =   lu_test.o pdgeqrrv.o pdmatgen.o pmatgeninc.o pdlaprnt.o orig_pdgetrf.o gpu_pdgeqrf.o gpu_pdlarfb.o util_ft.o util_gpu.o pdgetrrv.o \\$/;"	m
 LLD_	slp.h	9;"	d
 LLD_	util_ft.c	13;"	d	file:
 LMUL	pmatgeninc.f	/^      SUBROUTINE LMUL(/;"	s
@@ -242,9 +242,16 @@ bit_clear	f2c.h	164;"	d
 bit_set	f2c.h	165;"	d
 bit_test	f2c.h	163;"	d
 c	f2c.h	/^	complex c;$/;"	m	union:Multitype
+c__0	gpu_pdgetrf.c	/^static int c__0 = 0;$/;"	v	file:
 c__1	gpu_pdgeqrf.c	/^static int c__1 = 1;$/;"	v	file:
+c__1	gpu_pdgetrf.c	/^static int c__1 = 1;$/;"	v	file:
 c__2	gpu_pdgeqrf.c	/^static int c__2 = 2;$/;"	v	file:
+c__2	gpu_pdgetrf.c	/^static int c__2 = 2;$/;"	v	file:
 c__6	gpu_pdgeqrf.c	/^static int c__6 = 6;$/;"	v	file:
+c__6	gpu_pdgetrf.c	/^static int c__6 = 6;$/;"	v	file:
+c_b31	gpu_pdgetrf.c	/^static double c_b31 = 1.;$/;"	v	file:
+c_b34	gpu_pdgetrf.c	/^static double c_b34 = -1.;$/;"	v	file:
+c_n1	gpu_pdgetrf.c	/^static int c_n1 = -1;$/;"	v	file:
 c_n1	gpu_pdlarfb.c	/^static int c_n1 = -1;$/;"	v	file:
 cc	lu_test.c	/^int cc;$/;"	v
 cerr	f2c.h	/^{	flag cerr;$/;"	m	struct:__anon6
@@ -287,7 +294,9 @@ ftnlen	f2c.h	/^typedef long int ftnlen;$/;"	t
 ftnlen	f2c.h	/^typedef short ftnlen;$/;"	t
 g	f2c.h	/^	integer1 g;$/;"	m	union:Multitype
 gcos	f2c.h	205;"	d
+gpu_pdgemm_	pdgemm_.c	/^void gpu_pdgemm_( F_CHAR_T TRANSA, F_CHAR_T TRANSB,$/;"	f
 gpu_pdgeqrf_	gpu_pdgeqrf.c	/^\/* Subroutine *\/ int gpu_pdgeqrf_(int *m, int *n, doublereal *a, $/;"	f
+gpu_pdgetrf_	gpu_pdgetrf.c	/^\/* Subroutine *\/ int gpu_pdgetrf_(int *m, int *n, double *a, int *$/;"	f
 gpu_pdlarfb_	gpu_pdlarfb.c	/^\/* Subroutine *\/ int gpu_pdlarfb_(char *side, char *trans, char *direct, char *$/;"	f
 h	f2c.h	/^	shortint h;$/;"	m	union:Multitype
 hcomm	util_ft.h	/^	t_Comm * hcomm;$/;"	m	struct:__anon9
