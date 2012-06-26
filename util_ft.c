@@ -104,7 +104,51 @@ double verifyQR(double *Aorg, double * A, int M, int N, int * descA, double * ta
 }
 
 
+double verifyLU(double *Aorg, double * A, int M, int N, int * descA, int * ipiv, t_Grid *grid)
+{
 
+	double resid;
+	double *work=NULL;
+	int ione = 1, izero = 0;;
+	double done=1.0, mone=-1.0;
+	
+     int MpA0, NqA0, iarow, iacol, lwork;
+	
+	 // grid parameters
+	 int	nb = grid->nb;
+	 int	myrow = grid->myrow;
+	 int	mycol = grid->mycol;
+	 int	nprow = grid->nprow;
+	 int	npcol = grid->npcol;
+
+     //----------- allocate workspace ----------// -_-||
+
+	 //*          LWORK >= MpA0 * NB_A + NqA0 * MB_A, where
+	 //*
+	 //      *          IROFFA = MOD( IA-1, MB_A ), ICOFFA = MOD( JA-1, NB_A ),
+	 //      *          IAROW = INDXG2P( IA, MB_A, MYROW, RSRC_A, NPROW ),
+	 //      *          IACOL = INDXG2P( JA, NB_A, MYCOL, CSRC_A, NPCOL ),
+	 //      *          MpA0 = NUMROC( M+IROFFA, MB_A, MYROW, IAROW, NPROW ),
+	 //      *          NqA0 = NUMROC( N+ICOFFA, NB_A, MYCOL, IACOL, NPCOL ),
+
+	 iarow = indxg2p_ (&ione, &nb, &myrow, &izero, &nprow);
+	 iacol = indxg2p_ (&ione, &nb, &mycol, &izero, &npcol);
+
+	 MpA0 = numroc_(&M , &nb, &myrow, &iarow, &nprow );
+	 NqA0 = numroc_(&N , &nb, &mycol, &iacol, &npcol );
+
+	 lwork = MpA0 * nb + NqA0 * nb;
+	 work = (double *)malloc(lwork*sizeof(double));
+
+	 pdgetrrv_ (&M, &N, A, &ione, &ione, descA, ipiv, work);
+
+	 pdmatadd_ ( &M, &N, &done, Aorg, &ione, &ione, descA, &mone, A, &ione, &ione, descA);
+	 resid = pdlange_("F", &M, &N, A, &ione, &ione, descA, work)/pdlange_("F", &M, &M, Aorg, &ione, &ione, descA, work)/M;
+
+	 free (work);
+
+	 return resid;
+}
 
 /*
  * produce distributed matrix,  

@@ -145,8 +145,7 @@ extern void recover_checksum (char side, double *A, int m, int n, int *descA, in
 
 extern void recover (int CHK, int Z1, int Z2, int Z3, double *A, int m, int n, int *descA, int errx, int erry, int errstep, t_Grid *grid, t_checksuite *cs);
 
-//extern double verifyLU(double * A, int M, int * descA, int * ipiv, double *Acpy, t_Grid *grid);
-extern double verifyLU(double *Aorg, double * A, int M, int N, int * descA, double* tau, t_Grid *grid);
+extern double verifyLU(double *Aorg, double * A, int M, int N, int * descA, int * ipiv, t_Grid *grid);
 extern double verifyQR(double *Aorg, double * A, int M, int N, int * descA, double * tau, t_Grid *grid);
 
 extern void pdgetrrv_ (int *m, int *n, double *A, int *ia, int *ja, int *descA, int *ipiv, double *work);

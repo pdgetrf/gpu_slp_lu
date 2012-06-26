@@ -26,11 +26,11 @@ LDFLAGS =  -L$(HOME)/lib/lapack-3.3.1\
 		   -L$(HOME)/lib/BLACS/LIB 
 
 
-LINKLIB =   qr_test.o pdgeqrrv.o pdmatgen.o pmatgeninc.o pdlaprnt.o orig_pdgeqrf.o gpu_pdgeqrf.o gpu_pdlarfb.o util_ft.o util_gpu.o $(FASTBLASLIB) $(GPULIB)
+LINKLIB =   lu_test.o pdgeqrrv.o pdmatgen.o pmatgeninc.o pdlaprnt.o orig_pdgetrf.o gpu_pdgeqrf.o gpu_pdlarfb.o util_ft.o util_gpu.o pdgetrrv.o $(FASTBLASLIB) $(GPULIB)
 
-PROG = qr_test.x
+PROG = lu_test.x
 
-$(PROG) : qr_test.o pdgeqrrv.o pdmatgen.o pmatgeninc.o pdlaprnt.o util_ft.o orig_pdgeqrf.o gpu_pdgeqrf.o gpu_pdlarfb.o util_gpu.o
+$(PROG) : lu_test.o pdgeqrrv.o pdmatgen.o pmatgeninc.o pdlaprnt.o util_ft.o orig_pdgetrf.o gpu_pdgeqrf.o gpu_pdlarfb.o util_gpu.o pdgetrrv.o
 	$(FC) -o $(PROG) $(CFLAGS) $(LDFLAGS) $(LINKLIB) 
 
 .c.o:

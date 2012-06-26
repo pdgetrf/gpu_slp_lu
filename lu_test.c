@@ -14,6 +14,8 @@
 				{	printf ("error on line %d in %s\n", __LINE__, __FILE__);\
 					exit(0);}}
 
+void printout_devices( );
+
 int err_step=1;
 int err_block=1;
 int real_err_step;
@@ -45,6 +47,7 @@ int main(int argc, char **argv)
 	int nprow, npcol;
 	double MPIt1, MPIt2, MPIelapsed1, MPIelapsed2;
 	double GF1=0, GF2=0;
+	int *ipiv;
 
 	cc=0;
 	nprow = npcol = 1;
@@ -168,39 +171,31 @@ int main(int argc, char **argv)
 		}
 		
 		/*
-		 *	call GPU_QR
+		 *	call GPU_LU
 		 */ 
 		{
-			int lwork = -1;
-			double lazywork;
-			gpu_pdgeqrf_ (&M, &N, NULL, &ione, &ione, descA, NULL, &lazywork, &lwork, &info);
-			lwork = (int)lazywork;
-			double *work=(double*)malloc(lwork*sizeof(double));
-			double *tau = (double*)malloc(nchkc*sizeof(double));
-			
+			int ipiv_len = numroc_( &M, &nb, &myrow, &izero, &nprow ) + nb;
+			ipiv = (int *)malloc(ipiv_len*sizeof(int));
+
 			MPI_Barrier(MPI_COMM_WORLD);
-			MPIt1 = MPI_Wtime();    
+			MPIt1 = MPI_Wtime();
 
-			//first entry (healthy)
-			gpu_pdgeqrf_ (&M, &N, A, &ione, &ione, descA, tau, work, &lwork, &info);
-			checkerror(info, 0);
-			
+			pdgetrf_ (&M, &N, A, &ione, &ione, descA, ipiv, &info);
+
 			MPIt2 = MPI_Wtime();
-			double t1;
-			t1 = MPIt2-MPIt1;
+			checkerror(info, 0);
+			double elapsed=MPIt2-MPIt1;
+			MPI_Reduce( &elapsed, &MPIelapsed1, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
-			MPI_Reduce ( &t1, &MPIelapsed1, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-			
 			if (myrank_mpi==0)
 			{
-				GF1 = 4.0/3.0*M*M*M/MPIelapsed1/1e9;
+				GF1 = 2.0/3.0*M*M*M/MPIelapsed1/1e9;
 				printf ("%f\t\t", GF1);
 			}
-			
-			resid1 = verifyQR (Aorg, A, M, N, descA, tau, &grid);
+			resid1 = verifyLU (Aorg, A, M, N, descA, ipiv, &grid);
+			free (ipiv);
 
-			free(work);
-			free(tau);
+
 		}
 			
 		if (np_A*nq_A!=0)
@@ -209,43 +204,34 @@ int main(int argc, char **argv)
 		}
 
 		/*
-		 *	call ScaLAPACK QR 
+		 *	call ScaLAPACK LU 
 		 */ 
 		{
-			int lwork = -1;
-			double lazywork;
-			origpdgeqrf_ (&M, &N, NULL, &ione, &ione, descA, NULL, &lazywork, &lwork, &info);
-			lwork = (int)lazywork;
-			double *work=(double*)malloc(lwork*sizeof(double));
-			double *tau = (double*)malloc(nchkc*sizeof(double));
+			int ipiv_len = numroc_( &M, &nb, &myrow, &izero, &nprow ) + nb;
+			ipiv = (int *)malloc(ipiv_len*sizeof(int));
 
 			MPI_Barrier(MPI_COMM_WORLD);
-			MPIt1 = MPI_Wtime();    
+			MPIt1 = MPI_Wtime();
 
-			origpdgeqrf_ (&M, &N, A, &ione, &ione, descA, tau, work, &lwork, &info);
-			checkerror(info, 0);
-			
+			pdgetrf_ (&M, &N, A, &ione, &ione, descA, ipiv, &info);
+
 			MPIt2 = MPI_Wtime();
-			double t1;
-			t1 = MPIt2-MPIt1;
-
-			MPI_Reduce ( &t1, &MPIelapsed2, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+			checkerror(info, 0);
+			double elapsed=MPIt2-MPIt1;
+			MPI_Reduce( &elapsed, &MPIelapsed2, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
 			if (myrank_mpi==0)
 			{
-				GF2 = 4.0/3.0*M*M*M/MPIelapsed2/1e9;
+				GF2 = 2.0/3.0*M*M*M/MPIelapsed2/1e9;
 				printf ("%f\t\t", GF2);
 			}
 			
-			resid2 = verifyQR (Aorg, A, M, N, descA, tau, &grid);
-
-			free(work);
-			free(tau);
+			resid2 = verifyLU (Aorg, A, M, N, descA, ipiv, &grid);
+			free (ipiv);
 		}
 			
 		if (myrank_mpi==0)
 			printf ("%2.1f\t\t", (GF1-GF2)/GF2*100);
-			//printf ("%2.1f\t\t", (MPIelapsed1-MPIelapsed2)/MPIelapsed2*100);
 
 		/*
 		 * verify answers	

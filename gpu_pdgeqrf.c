@@ -14,6 +14,7 @@
 #include "stdio.h"
 #include "f2c.h"
 #include "util_gpu.h"
+#include "slp.h"
 
 /* Table of constant values */
 

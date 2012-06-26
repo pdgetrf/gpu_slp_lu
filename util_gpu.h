@@ -102,3 +102,4 @@ if (__ptr == 0) {                                                        \
 
 #define MagmaMaxGPUs       8
 
+

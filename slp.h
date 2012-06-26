@@ -17,10 +17,10 @@ extern void pdpotrrv_ (char * uplo, int * m, double * A, int * i, int * j, int *
 
 extern int iceil_(int * A, int * B);
 
-extern void pchk1mat_ (int * MA, int * MAPOSO, int * NA, int * NAPOS0, int * IA, int * JA, int * DESCA, 
-						int * DESCAPOS0, int * NEXTRA, int * EX, int * EXPOS, int * INFO);
+//extern void pchk1mat_ (int * MA, int * MAPOSO, int * NA, int * NAPOS0, int * IA, int * JA, int * DESCA, 
+//						int * DESCAPOS0, int * NEXTRA, int * EX, int * EXPOS, int * INFO);
 
-extern void chk1mat_ (int * MA, int * MAPOSO, int * NA, int * NAPOS0, int * IA, int * JA, int * DESCA, int * DESCAPOS0, int * INFO);
+//extern void chk1mat_ (int * MA, int * MAPOSO, int * NA, int * NAPOS0, int * IA, int * JA, int * DESCA, int * DESCAPOS0, int * INFO);
 
 extern void Cblacs_gridexit( int ictxt );
 
@@ -54,9 +54,9 @@ extern void Cdtrbs2d(int ConTxt, char *scope, char *top, char *uplo, char *diag,
 
 extern void Cdtrbr2d(int ConTxt, char *scope, char *top, char *uplo, char *diag, int m, int n, double *A, int lda, int rsrc, int csrc);
 
-extern void pb_topget__( int * ICTXT, char * OP, char * SCOPE, char * TOP );
+//extern void pb_topget__( int * ICTXT, char * OP, char * SCOPE, char * TOP );
 
-extern void pb_topset__( int * ICTXT, char * OP, char * SCOPE, char * TOP );
+//extern void pb_topset__( int * ICTXT, char * OP, char * SCOPE, char * TOP );
 
 extern int numroc_(int * N, int * NB, int * IPROC, int * ISRCPROC, int * NPROCS );
 		
