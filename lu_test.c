@@ -194,8 +194,6 @@ int main(int argc, char **argv)
 			}
 			resid1 = verifyLU (Aorg, A, M, N, descA, ipiv, &grid);
 			free (ipiv);
-
-
 		}
 			
 		if (np_A*nq_A!=0)

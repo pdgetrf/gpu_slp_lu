@@ -192,7 +192,6 @@ PDLAPRNT	pdlaprnt.f	/^      SUBROUTINE PDLAPRNT(/;"	s
 PDLARFB	pdlarfb.f	/^      SUBROUTINE PDLARFB(/;"	s
 PDMATGEN	pdmatgen.f	/^      SUBROUTINE PDMATGEN(/;"	s
 PDRAND	pmatgeninc.f	/^      DOUBLE PRECISION FUNCTION PDRAND(/;"	f
-PRINT	PB_CptrsmAB.c	383;"	d	file:
 PROG	makefile	/^PROG = lu_test.x$/;"	m
 PSRAND	pmatgeninc.f	/^      REAL FUNCTION PSRAND(/;"	f
 R	util_ft.h	/^	double *R;$/;"	m	struct:__anon9
