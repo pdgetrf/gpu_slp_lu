@@ -41,7 +41,7 @@ static int c_n1 = -1;
 	    int *, double *, int *, int *, int *, 
 	    double *, double *, int *, int *, int *, 
 	    ftnlen, ftnlen), blacs_gridinfo__(int *, int *, int *,
-	     int *, int *), pdtrsm_(char *, char *, char *, char *, 
+	     int *, int *), gpu_pdtrsm_(char *, char *, char *, char *, 
 	    int *, int *, double *, double *, int *, 
 	    int *, int *, double *, int *, int *, int 
 	    *, ftnlen, ftnlen, ftnlen, ftnlen), igamn2d_(int *, char *, 
@@ -296,7 +296,7 @@ static int c_n1 = -1;
 
 	i__1 = *n - jb;
 	i__2 = jn + 1;
-	pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__1, &c_b31, &
+	gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__1, &c_b31, &
 		a[1], ia, ja, &desca[1], &a[1], ia, &i__2, &desca[1], (ftnlen)
 		4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
 
@@ -359,7 +359,7 @@ static int c_n1 = -1;
 
 	    i__3 = *n - j - jb + *ja;
 	    i__4 = j + jb;
-	    pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__3, &
+	    gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__3, &
 		    c_b31, &a[1], &i__, &j, &desca[1], &a[1], &i__, &i__4, &
 		    desca[1], (ftnlen)4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
 

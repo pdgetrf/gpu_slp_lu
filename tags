@@ -73,7 +73,7 @@ A_error	util_ft.h	17;"	d
 BLACSLIB	makefile	/^BLACSLIB =  $(HOME)\/lib\/BLACS\/LIB\/blacsCinit_MPI-LINUX-0.a  $(HOME)\/lib\/BLACS\/LIB\/blacsF77init_MPI-LINUX-0.a  $(HOME)\/lib\/BLACS\/LIB\/blacs_MPI-LINUX-0.a$/;"	m
 B_error	util_ft.h	20;"	d
 CC	makefile	/^CC = mpicc $/;"	m
-CFLAGS	makefile	/^CFLAGS = -I\/opt\/mkl\/include -I\/opt\/cuda\/include -Wall -I\/home\/du\/lib\/scalapack-1.8.0\/PBLAS\/SRC$/;"	m
+CFLAGS	makefile	/^CFLAGS = -I\/opt\/mkl\/include -I\/opt\/cuda\/include -Wall -I\/home\/du\/lib\/scalapack-1.8.0\/PBLAS\/SRC -I\/home\/du\/lib\/scalapack-1.8.0\/PBLAS\/SRC\/PTOOLS$/;"	m
 CHECKSUM	util_ft.h	29;"	d
 COPY	util_ft.h	41;"	d
 CSRC_	slp.h	8;"	d
@@ -100,6 +100,9 @@ FC	makefile	/^FC = mpif77 $/;"	m
 FFLAGS	makefile	/^FFLAGS =  -fsecond-underscore$/;"	m
 GPU	gpu_pdlarfb.c	518;"	d	file:
 GPULIB	makefile	/^GPULIB = -L\/opt\/cuda\/lib64 -lcublas -lcudart -lcuda$/;"	m
+GPU_PB_CpgemmAB	PB_CpgemmAB.c	/^void GPU_PB_CpgemmAB( PBTYP_T * TYPE, char * DIRECA, char * DIRECB,$/;"	f
+GPU_PB_CptrsmAB	PB_CptrsmAB.c	/^void GPU_PB_CptrsmAB( PBTYP_T * TYPE, char * VARIANT, char * SIDE, char * UPLO,$/;"	f
+GPU_PB_CptrsmAB0	PB_CptrsmAB0.c	/^void GPU_PB_CptrsmAB0( PBTYP_T * TYPE, char * SIDE, char * UPLO, char * DIAG,$/;"	f
 HOME	makefile	/^HOME = \/home\/du$/;"	m
 H_f	f2c.h	/^typedef VOID H_f;	\/* character function *\/$/;"	t
 H_fp	f2c.h	/^typedef \/* Character *\/ VOID (*H_fp)();$/;"	t
@@ -189,6 +192,7 @@ PDLAPRNT	pdlaprnt.f	/^      SUBROUTINE PDLAPRNT(/;"	s
 PDLARFB	pdlarfb.f	/^      SUBROUTINE PDLARFB(/;"	s
 PDMATGEN	pdmatgen.f	/^      SUBROUTINE PDMATGEN(/;"	s
 PDRAND	pmatgeninc.f	/^      DOUBLE PRECISION FUNCTION PDRAND(/;"	f
+PRINT	PB_CptrsmAB.c	383;"	d	file:
 PROG	makefile	/^PROG = lu_test.x$/;"	m
 PSRAND	pmatgeninc.f	/^      REAL FUNCTION PSRAND(/;"	f
 R	util_ft.h	/^	double *R;$/;"	m	struct:__anon9
@@ -298,6 +302,7 @@ gpu_pdgemm_	pdgemm_.c	/^void gpu_pdgemm_( F_CHAR_T TRANSA, F_CHAR_T TRANSB,$/;"	
 gpu_pdgeqrf_	gpu_pdgeqrf.c	/^\/* Subroutine *\/ int gpu_pdgeqrf_(int *m, int *n, doublereal *a, $/;"	f
 gpu_pdgetrf_	gpu_pdgetrf.c	/^\/* Subroutine *\/ int gpu_pdgetrf_(int *m, int *n, double *a, int *$/;"	f
 gpu_pdlarfb_	gpu_pdlarfb.c	/^\/* Subroutine *\/ int gpu_pdlarfb_(char *side, char *trans, char *direct, char *$/;"	f
+gpu_pdtrsm_	pdtrsm_.c	/^void gpu_pdtrsm_( F_CHAR_T SIDE, F_CHAR_T UPLO, F_CHAR_T TRANS, F_CHAR_T DIAG,$/;"	f
 h	f2c.h	/^	shortint h;$/;"	m	union:Multitype
 hcomm	util_ft.h	/^	t_Comm * hcomm;$/;"	m	struct:__anon9
 here	lu_test.c	9;"	d	file:

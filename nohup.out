@@ -1,0 +1,33 @@
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 3071.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2070, 1147.0 MHz clock, 5375.2 MB memory, capability 2.0
+device 0: Tesla C2070, 1147.0 MHz clock, 5375.2 MB memory, capability 2.0
+device 0: Tesla C2070, 1147.0 MHz clock, 5375.2 MB memory, capability 2.0
+device 0: Tesla C2070, 1147.0 MHz clock, 5375.2 MB memory, capability 2.0
+done setting up MPI and BLACS, nprow=4, npcol=3, NB=100
+M		GFlop/s (r)		GFlop/s (n)		Perc		resid		who failed
+4000		48.646651		60.949159		-20.2		1.252343e-18		X
+6000		93.994043		102.668096		-8.4		1.025995e-18		X
+8000		24.303777		24.809117		-2.0		9.039972e-19		X
+10000		21.395837		21.306009		0.4		8.231609e-19		X
+12000		22.853356		22.413926		2.0		7.578710e-19		X
+14000		29.971114		32.437599		-7.6		7.151616e-19		X
+16000		42.317687		46.224190		-8.5		6.822511e-19		X
+18000		64.845887		53.409940		21.4		6.516396e-19		X
+20000		71.901513		66.857563		7.5		6.302851e-19		X
+22000		87.934255		87.919591		0.0		6.129405e-19		X
+24000		100.917261		98.322433		2.6		5.953674e-19		X
+26000		113.287583		110.234945		2.8		5.800310e-19		X
+28000		131.522145		109.116437		20.5		5.690306e-19		X
+30000		121.192180		140.251667		-13.6		5.578274e-19		X
+32000		153.451945		138.784207		10.6		5.492276e-19		X
+34000		158.957808		152.007009		4.6		5.385352e-19		X
+36000		183.577740		172.332127		6.5		5.319040e-19		X
+38000		200.696487		183.523435		9.4		5.231734e-19		X
+40000		203.068013		188.162614		7.9		5.194152e-19		X

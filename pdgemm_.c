@@ -17,6 +17,12 @@
 #include "PBblas.h"
 #include "stdio.h"
 
+void GPU_PB_CpgemmAB( PBTYP_T * TYPE, char * DIRECA, char * DIRECB,
+                  char * TRANSA, char * TRANSB, int M, int N, int K,
+                  char * ALPHA, char * A, int IA, int JA, int * DESCA,
+                  char * B, int IB, int JB, int * DESCB, char * BETA,
+                  char * C, int IC, int JC, int * DESCC );
+
 #ifdef __STDC__
 void gpu_pdgemm_( F_CHAR_T TRANSA, F_CHAR_T TRANSB,
               int * M, int * N, int * K,
@@ -343,7 +349,6 @@ void pdgemm_( TRANSA, TRANSB, M, N, K, ALPHA, A, IA, JA, DESCA,
    ACest = (double)(*M);
    BCest = (double)(*N);
 
-   printf ("here\n");
 
    if( notb )
    {
@@ -474,9 +479,9 @@ void pdgemm_( TRANSA, TRANSB, M, N, K, ALPHA, A, IA, JA, DESCA,
    DirAB = ( rtop == CTOP_DRING ? CBACKWARD : CFORWARD );
    DirBC = ( ctop == CTOP_DRING ? CBACKWARD : CFORWARD );
 
-   if( ChooseAB )
+   if( ChooseAB )	//xxx 
    {
-      PB_CpgemmAB( type, &DirAB, &DirBC, ( nota ? NOTRAN : TRAN ), ( notb ?
+      GPU_PB_CpgemmAB( type, &DirAB, &DirBC, ( nota ? NOTRAN : TRAN ), ( notb ?
                    NOTRAN : TRAN ), *M, *N, *K, ((char *)ALPHA), ((char *)A),
                    Ai, Aj, Ad, ((char *)B), Bi, Bj, Bd, ((char *)BETA),
                    ((char *)C), Ci, Cj, Cd );
