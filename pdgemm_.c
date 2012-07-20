@@ -488,6 +488,7 @@ void pdgemm_( TRANSA, TRANSB, M, N, K, ALPHA, A, IA, JA, DESCA,
    }
    else if( ChooseBC )
    {
+	  printf ("not supported\n");
       PB_CpgemmBC( type, &DirAB, &DirBC, ( nota ? NOTRAN : TRAN ), ( notb ?
                    NOTRAN : TRAN ), *M, *N, *K, ((char *)ALPHA), ((char *)A),
                    Ai, Aj, Ad, ((char *)B), Bi, Bj, Bd, ((char *)BETA),
@@ -495,6 +496,7 @@ void pdgemm_( TRANSA, TRANSB, M, N, K, ALPHA, A, IA, JA, DESCA,
    }
    else
    {
+	  printf ("not supported\n");
       PB_CpgemmAC( type, &DirAB, &DirBC, ( nota ? NOTRAN : TRAN ), ( notb ?
                    NOTRAN : TRAN ), *M, *N, *K, ((char *)ALPHA), ((char *)A),
                    Ai, Aj, Ad, ((char *)B), Bi, Bj, Bd, ((char *)BETA),

@@ -283,40 +283,42 @@ static int c_n1 = -1;
 
     pdgetf2_(m, &jb, &a[1], ia, ja, &desca[1], &ipiv[1], info);
 
-    if (jb + 1 <= *n) {
+    if (jb + 1 <= *n) 
+	{
 
-/*        Apply interchanges to columns JN+1:JA+N-1. */
+		/*        Apply interchanges to columns JN+1:JA+N-1. */
 
-	i__1 = *n - jb;
-	i__2 = jn + 1;
-	pdlaswp_("Forward", "Rows", &i__1, &a[1], ia, &i__2, &desca[1], ia, &
-		in, &ipiv[1], (ftnlen)7, (ftnlen)4);
+		i__1 = *n - jb;
+		i__2 = jn + 1;
+		pdlaswp_("Forward", "Rows", &i__1, &a[1], ia, &i__2, &desca[1], ia, &
+				in, &ipiv[1], (ftnlen)7, (ftnlen)4);
 
-/*        Compute block row of U. */
+		/*        Compute block row of U. */
 
-	i__1 = *n - jb;
-	i__2 = jn + 1;
-	gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__1, &c_b31, &
-		a[1], ia, ja, &desca[1], &a[1], ia, &i__2, &desca[1], (ftnlen)
-		4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
+		i__1 = *n - jb;
+		i__2 = jn + 1;
+		gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__1, &c_b31, &
+				a[1], ia, ja, &desca[1], &a[1], ia, &i__2, &desca[1], (ftnlen)
+				4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
 
-	if (jb + 1 <= *m) {
+		if (jb + 1 <= *m) 
+		{
+			/*           Update trailing submatrix. */
 
-/*           Update trailing submatrix. */
+			i__1 = *m - jb;
+			i__2 = *n - jb;
+			i__3 = in + 1;
+			i__4 = jn + 1;
+			i__5 = in + 1;
+			i__6 = jn + 1;
 
-	    i__1 = *m - jb;
-	    i__2 = *n - jb;
-	    i__3 = in + 1;
-	    i__4 = jn + 1;
-	    i__5 = in + 1;
-	    i__6 = jn + 1;
-	    gpu_pdgemm_("No transpose", "No transpose", &i__1, &i__2, &jb, &c_b34,
-		     &a[1], &i__3, ja, &desca[1], &a[1], ia, &i__4, &desca[1],
-		     &c_b31, &a[1], &i__5, &i__6, &desca[1], (ftnlen)12, (
-		    ftnlen)12);
+			// xxx
+			gpu_pdgemm_("No transpose", "No transpose", &i__1, &i__2, &jb, &c_b34,
+					&a[1], &i__3, ja, &desca[1], &a[1], ia, &i__4, &desca[1],
+					&c_b31, &a[1], &i__5, &i__6, &desca[1], (ftnlen)12, (ftnlen)12);
 
+		}
 	}
-    }
 
 /*     Loop over the remaining blocks of columns. */
 

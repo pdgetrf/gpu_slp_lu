@@ -364,7 +364,13 @@ char           * A, * B;
 			else
 			{
 				//-------------------------------------------------------------------------------------
-				// this is simplay a local TRSM call in blocks, should be able to run in GPU
+
+
+
+#ifdef GPU
+
+#else
+				// this is simplay just a local TRSM call in blocks, should be able to run in GPU
 
 				for( k = 0; k < M; k += kb )
 				{
@@ -442,6 +448,7 @@ char           * A, * B;
 
 				}
 			}
+#endif
 			//-------------------------------------------------------------------------------------
 		}
 		else

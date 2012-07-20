@@ -15,6 +15,7 @@
 #include "../PBtools.h"
 #include "../PBblacs.h"
 #include "../PBblas.h"
+#include "util_gpu.h"
 
 #ifdef __STDC__
 void GPU_PB_CpgemmAB( PBTYP_T * TYPE, char * DIRECA, char * DIRECB,
@@ -343,15 +344,42 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 			/*
 			 *  Perform the local update if I own some of sub( C )
 			 */
-			printf ("\n(%d,%d): M=%d, N=%d, K=%d, IC=%d, JC=%d\n", myrow, mycol, Cmp, Cnq, K, IC, JC);
+#define GPU
+#ifdef GPU
+			double *dA, *dB, *dC;
+
+			// allocate A, B and C on GPU
+			TESTING_DEVALLOC (dA, double, Cmp*K);
+			TESTING_DEVALLOC (dB, double, K*Cnq);
+			TESTING_DEVALLOC (dC, double, Cmp*Cnq);
+			
+			cublasSetMatrix(Cmp, K, sizeof(double), WA, WAd0[LLD_], dA, Cmp);
+			cublasSetMatrix(K, Cnq, sizeof(double), WB, WBd0[LLD_], dB, K);
+			cublasSetMatrix(Cmp, Cnq, sizeof(double), Mptr(C,Cii, Cjj, Cld, size), Cld, dC, Cmp);
+			
+			cublasDgemm(MagmaNoTrans, MagmaNoTrans, Cmp, Cnq, K, -1, dA, Cmp,
+					  					                             dB, K,
+												               	  1, dC, Cmp);
+					
+			cublasGetMatrix(Cmp, Cnq, sizeof(double), dC, Cmp, Mptr(C,Cii, Cjj, Cld, size), Cld);
+			
+			TESTING_DEVFREE(dA);
+			TESTING_DEVFREE(dB);
+			TESTING_DEVFREE(dC);
+
+#else
+			//printf ("\n(%d,%d): M=%d, N=%d, K=%d, IC=%d, JC=%d\n", myrow, mycol, Cmp, Cnq, K, IC, JC);
 			TYPE->Fgemm( C2F_CHAR( NOTRAN ), C2F_CHAR( NOTRAN ), &Cmp, &Cnq, &K,
 					ALPHA, WA, &WAd0[LLD_], WB, &WBd0[LLD_], BETA, Mptr( C,
 						Cii, Cjj, Cld, size ), &Cld );
+#endif
 		}
 		if( WAfr ) free( WA );
 		if( WBfr ) free( WB );
 		return;
 	}
+	  
+	printf ("not supported\n");
 	/*
 	 *  sub( A ) and sub( B ) span more than one process row or column.
 	 */
