@@ -324,67 +324,68 @@ static int c_n1 = -1;
 
     i__1 = *ja + mn - 1;
     i__2 = desca[6];
-    for (j = jn + 1; i__2 < 0 ? j >= i__1 : j <= i__1; j += i__2) {
-/* Computing MIN */
-	i__3 = mn - j + *ja;
-	jb = min(i__3,desca[6]);
-	i__ = *ia + j - *ja;
+    for (j = jn + 1; i__2 < 0 ? j >= i__1 : j <= i__1; j += i__2) 
+	{
+		/* Computing MIN */
+		i__3 = mn - j + *ja;
+		jb = min(i__3,desca[6]);
+		i__ = *ia + j - *ja;
 
-/*        Factor diagonal and subdiagonal blocks and test for exact */
-/*        singularity. */
+		/*        Factor diagonal and subdiagonal blocks and test for exact */
+		/*        singularity. */
 
-	i__3 = *m - j + *ja;
-	pdgetf2_(&i__3, &jb, &a[1], &i__, &j, &desca[1], &ipiv[1], &iinfo);
+		i__3 = *m - j + *ja;
+		pdgetf2_(&i__3, &jb, &a[1], &i__, &j, &desca[1], &ipiv[1], &iinfo);
 
-	if (*info == 0 && iinfo > 0) {
-	    *info = iinfo + j - *ja;
+		if (*info == 0 && iinfo > 0) {
+			*info = iinfo + j - *ja;
+		}
+
+		/*        Apply interchanges to columns JA:J-JA. */
+
+		i__3 = j - *ja;
+		i__4 = i__ + jb - 1;
+		pdlaswp_("Forward", "Rowwise", &i__3, &a[1], ia, ja, &desca[1], &i__, 
+				&i__4, &ipiv[1], (ftnlen)7, (ftnlen)7);
+
+		if (j - *ja + jb + 1 <= *n) 
+		{
+
+			/*           Apply interchanges to columns J+JB:JA+N-1. */
+
+			i__3 = *n - j - jb + *ja;
+			i__4 = j + jb;
+			i__5 = i__ + jb - 1;
+			pdlaswp_("Forward", "Rowwise", &i__3, &a[1], ia, &i__4, &desca[1],
+					&i__, &i__5, &ipiv[1], (ftnlen)7, (ftnlen)7);
+
+			/*           Compute block row of U. */
+
+			i__3 = *n - j - jb + *ja;
+			i__4 = j + jb;
+			gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__3, &
+					c_b31, &a[1], &i__, &j, &desca[1], &a[1], &i__, &i__4, &
+					desca[1], (ftnlen)4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
+
+			if (j - *ja + jb + 1 <= *m) 
+			{
+				/*              Update trailing submatrix. */
+
+				i__3 = *m - j - jb + *ja;
+				i__4 = *n - j - jb + *ja;
+				i__5 = i__ + jb;
+				i__6 = j + jb;
+				i__7 = i__ + jb;
+				i__8 = j + jb;
+				gpu_pdgemm_("No transpose", "No transpose", &i__3, &i__4, &jb, &
+						c_b34, &a[1], &i__5, &j, &desca[1], &a[1], &i__, &
+						i__6, &desca[1], &c_b31, &a[1], &i__7, &i__8, &desca[
+						1], (ftnlen)12, (ftnlen)12);
+
+			}
+		}
+		/* L10: */
 	}
-
-/*        Apply interchanges to columns JA:J-JA. */
-
-	i__3 = j - *ja;
-	i__4 = i__ + jb - 1;
-	pdlaswp_("Forward", "Rowwise", &i__3, &a[1], ia, ja, &desca[1], &i__, 
-		&i__4, &ipiv[1], (ftnlen)7, (ftnlen)7);
-
-	if (j - *ja + jb + 1 <= *n) {
-
-/*           Apply interchanges to columns J+JB:JA+N-1. */
-
-	    i__3 = *n - j - jb + *ja;
-	    i__4 = j + jb;
-	    i__5 = i__ + jb - 1;
-	    pdlaswp_("Forward", "Rowwise", &i__3, &a[1], ia, &i__4, &desca[1],
-		     &i__, &i__5, &ipiv[1], (ftnlen)7, (ftnlen)7);
-
-/*           Compute block row of U. */
-
-	    i__3 = *n - j - jb + *ja;
-	    i__4 = j + jb;
-	    gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__3, &
-		    c_b31, &a[1], &i__, &j, &desca[1], &a[1], &i__, &i__4, &
-		    desca[1], (ftnlen)4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
-
-	    if (j - *ja + jb + 1 <= *m) {
-
-/*              Update trailing submatrix. */
-
-		i__3 = *m - j - jb + *ja;
-		i__4 = *n - j - jb + *ja;
-		i__5 = i__ + jb;
-		i__6 = j + jb;
-		i__7 = i__ + jb;
-		i__8 = j + jb;
-		gpu_pdgemm_("No transpose", "No transpose", &i__3, &i__4, &jb, &
-			c_b34, &a[1], &i__5, &j, &desca[1], &a[1], &i__, &
-			i__6, &desca[1], &c_b31, &a[1], &i__7, &i__8, &desca[
-			1], (ftnlen)12, (ftnlen)12);
-
-	    }
-	}
-
-/* L10: */
-    }
 
     if (*info == 0) {
 	*info = mn + 1;
