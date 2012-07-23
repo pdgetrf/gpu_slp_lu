@@ -21,7 +21,7 @@ void GPU_PB_CpgemmAB( PBTYP_T * TYPE, char * DIRECA, char * DIRECB,
                   char * TRANSA, char * TRANSB, int M, int N, int K,
                   char * ALPHA, char * A, int IA, int JA, int * DESCA,
                   char * B, int IB, int JB, int * DESCB, char * BETA,
-                  char * C, int IC, int JC, int * DESCC );
+                  char * C, int IC, int JC, int * DESCC, int *descC );
 
 #ifdef __STDC__
 void gpu_pdgemm_( F_CHAR_T TRANSA, F_CHAR_T TRANSB,
@@ -484,7 +484,7 @@ void pdgemm_( TRANSA, TRANSB, M, N, K, ALPHA, A, IA, JA, DESCA,
       GPU_PB_CpgemmAB( type, &DirAB, &DirBC, ( nota ? NOTRAN : TRAN ), ( notb ?
                    NOTRAN : TRAN ), *M, *N, *K, ((char *)ALPHA), ((char *)A),
                    Ai, Aj, Ad, ((char *)B), Bi, Bj, Bd, ((char *)BETA),
-                   ((char *)C), Ci, Cj, Cd );
+                   ((char *)C), Ci, Cj, Cd, DESCC);
    }
    else if( ChooseBC )
    {
