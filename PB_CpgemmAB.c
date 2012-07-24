@@ -383,10 +383,12 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 					cublasDgemm(MagmaNoTrans, MagmaNoTrans, Cmp, Cnq-K, K, -1, dA, Cmp, dB, K, 1, dC, Cmp);
 
 					cudaMemcpy2DAsync	(pinnbuf, Cmp*sizeof(double), dC, Cmp*sizeof(double), Cmp*sizeof(double), Cnq-K, cudaMemcpyDeviceToHost, 0);
+					/*
 					cudaStreamSynchronize (0); 	
 					int ss=0;
 					for (ss=0; ss<(Cnq-K); ss++)
 						memcpy (Mptr(C, Cii, Cjj+K+ss, Cld, size), pinnbuf+ss*Cmp, Cmp*sizeof(double));
+					 */
 					//cublasGetMatrix(Cmp, Cnq-K, sizeof(double), dC, Cmp, Mptr(C, Cii, Cjj+K, Cld, size), Cld);
 
 					TESTING_DEVFREE(dA);

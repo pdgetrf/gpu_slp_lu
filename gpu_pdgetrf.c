@@ -12,8 +12,14 @@
 
 #include "stdlib.h"
 #include "stdio.h"
+#include "string.h"
 #include "f2c.h"
 #include "util_gpu.h"
+
+extern void infog2l_ (int *GRINDX, int *GCINDX, int *DESC, int *NPROW, int *NPCOL, int *MYROW, int *MYCOL, 
+					   int *LRINDX, int *LCINDX, int *RSRC, int *CSRC );
+extern int numroc_(int * N, int * NB, int * IPROC, int * ISRCPROC, int * NPROCS );
+
 
 
 
@@ -302,7 +308,6 @@ static int c_n1 = -1;
 		TESTING_HOSTALLOC(pinnbuf, double, mpc*nqc);
 	}
 #endif
-					
 
     pdgetf2_(m, &jb, &a[1], ia, ja, &desca[1], &ipiv[1], info);
 
@@ -359,6 +364,29 @@ static int c_n1 = -1;
 
 		i__3 = *m - j + *ja;
 		pdgetf2_(&i__3, &jb, &a[1], &i__, &j, &desca[1], &ipiv[1], &iinfo);
+
+		/*
+		 * copy the result of last trailing update (non-lookahead part) 
+		 */
+		int iic, jjc, icrow, iccol; 
+		infog2l_(&i__, &j, &desca[1], &nprow, &npcol, &myrow, &mycol, 
+				&iic, &jjc, &icrow, &iccol);
+		iic--;	jjc--;
+
+		if (mycol==iccol)
+		{
+			int Cnq = nqc - jjc; 
+			int Kb = desca[5];
+			if (Cnq-desca[5]>0)
+			{
+				int mmpc = mpc-iic;
+//				printf ("(%d,%d), i__=%d, j=%d, m=%d, n=%d, lda=%d\n", myrow, mycol, i__, j, mmpc, Cnq-desca[5], mpc);
+				cudaStreamSynchronize (0); 	
+				int ss=0;
+				for (ss=0; ss<(Cnq-Kb); ss++)
+					memcpy (&a[1]+(jjc+desca[5]+ss)*mpc+iic, pinnbuf+ss*mmpc, mmpc*sizeof(double));
+			}
+		}
 
 		if (*info == 0 && iinfo > 0) {
 			*info = iinfo + j - *ja;
