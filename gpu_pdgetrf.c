@@ -21,6 +21,7 @@ extern void infog2l_ (int *GRINDX, int *GCINDX, int *DESC, int *NPROW, int *NPCO
 extern int numroc_(int * N, int * NB, int * IPROC, int * ISRCPROC, int * NPROCS );
 
 
+double *dA, *dB, *dC;
 
 
 /* Table of constant values */
@@ -301,6 +302,13 @@ static int c_n1 = -1;
 	i__1 = *n;
 	int nqc = numroc_(&i__1, &desca[6], &mycol, &izero, &npcol);
 	
+
+	// allocate A, B and C on GPU
+	int Kb = desca[5];
+	TESTING_DEVALLOC (dA, double, mpc*Kb);
+	TESTING_DEVALLOC (dB, double, Kb*nqc);
+	TESTING_DEVALLOC (dC, double, mpc*nqc);
+	
 //	printf ("(%d,%d) mpc=%d, nqc=%d, desca[5]=%d, 6=%d\n", myrow, mycol, mpc, nqc, desca[5], desca[6]);
 	double *pinnbuf=NULL;
 	if (mpc*nqc>0)
@@ -376,7 +384,6 @@ static int c_n1 = -1;
 		if (mycol==iccol)
 		{
 			int Cnq = nqc - jjc; 
-			int Kb = desca[5];
 			if (Cnq-desca[5]>0)
 			{
 				int mmpc = mpc-iic;
@@ -458,6 +465,9 @@ static int c_n1 = -1;
 	{
 		TESTING_HOSTFREE(pinnbuf);
 	}
+	TESTING_DEVFREE(dA);
+	TESTING_DEVFREE(dB);
+	TESTING_DEVFREE(dC);
 #endif
 
     return 0;

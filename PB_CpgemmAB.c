@@ -17,6 +17,8 @@
 #include "../PBblas.h"
 #include "util_gpu.h"
 #include "string.h"
+					
+extern double *dA, *dB, *dC;
 
 extern void infog2l_ (int *GRINDX, int *GCINDX, int *DESC, int *NPROW, int *NPCOL, int *MYROW, int *MYCOL, 
 					   int *LRINDX, int *LCINDX, int *RSRC, int *CSRC );
@@ -369,12 +371,13 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 				if (Cnq-K>0)
 				{
 					//printf ("(%d,%d): IC=%d, JC=%d, M=%d, N=%d\n", myrow, mycol, IC, JC, Cmp, K);
-					double *dA, *dB, *dC;
 
 					// allocate A, B and C on GPU
+					/*
 					TESTING_DEVALLOC (dA, double, Cmp*K);
 					TESTING_DEVALLOC (dB, double, K*(Cnq-K));
 					TESTING_DEVALLOC (dC, double, Cmp*(Cnq-K));
+					*/
 
 					cublasSetMatrix(Cmp, K, sizeof(double), WA, WAd0[LLD_], dA, Cmp);
 					cublasSetMatrix(K, Cnq-K, sizeof(double), Mptr(WB, 0, K, WBd0[LLD_], size), WBd0[LLD_], dB, K);
@@ -391,9 +394,11 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 					 */
 					//cublasGetMatrix(Cmp, Cnq-K, sizeof(double), dC, Cmp, Mptr(C, Cii, Cjj+K, Cld, size), Cld);
 
+					/*
 					TESTING_DEVFREE(dA);
 					TESTING_DEVFREE(dB);
 					TESTING_DEVFREE(dC);
+					*/
 
 					/*
 					// allocate A, B and C on GPU
