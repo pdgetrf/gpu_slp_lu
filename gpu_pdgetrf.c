@@ -387,7 +387,6 @@ static int c_n1 = -1;
 			if (Cnq-desca[5]>0)
 			{
 				int mmpc = mpc-iic;
-//				printf ("(%d,%d), i__=%d, j=%d, m=%d, n=%d, lda=%d\n", myrow, mycol, i__, j, mmpc, Cnq-desca[5], mpc);
 				cudaStreamSynchronize (0); 	
 				int ss=0;
 				#pragma omp parallel for default(none) private(ss)
