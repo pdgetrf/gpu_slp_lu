@@ -16,6 +16,7 @@
 #include "../PBblacs.h"
 #include "../PBblas.h"
 #include "util_gpu.h"
+#include "string.h"
 
 extern void infog2l_ (int *GRINDX, int *GCINDX, int *DESC, int *NPROW, int *NPCOL, int *MYROW, int *MYCOL, 
 					   int *LRINDX, int *LCINDX, int *RSRC, int *CSRC );
@@ -26,7 +27,7 @@ void GPU_PB_CpgemmAB( PBTYP_T * TYPE, char * DIRECA, char * DIRECB,
 		char * TRANSA, char * TRANSB, int M, int N, int K,
 		char * ALPHA, char * A, int IA, int JA, int * DESCA,
 		char * B, int IB, int JB, int * DESCB, char * BETA,
-		char * C, int IC, int JC, int * DESCC, int *descC)	
+		char * C, int IC, int JC, int * DESCC, int *descC, double *pinnbuf)	
 		// added the descC parameter because don't know whe the hell is in DESCC
 #else
 void PB_CpgemmAB( TYPE, DIRECA, DIRECB, TRANSA, TRANSB, M, N, K, ALPHA,
@@ -381,7 +382,12 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 
 					cublasDgemm(MagmaNoTrans, MagmaNoTrans, Cmp, Cnq-K, K, -1, dA, Cmp, dB, K, 1, dC, Cmp);
 
-					cublasGetMatrix(Cmp, Cnq-K, sizeof(double), dC, Cmp, Mptr(C, Cii, Cjj+K, Cld, size), Cld);
+					cudaMemcpy2DAsync	(pinnbuf, Cmp*sizeof(double), dC, Cmp*sizeof(double), Cmp*sizeof(double), Cnq-K, cudaMemcpyDeviceToHost, 0);
+					cudaStreamSynchronize (0); 	
+					int ss=0;
+					for (ss=0; ss<(Cnq-K); ss++)
+						memcpy (Mptr(C, Cii, Cjj+K+ss, Cld, size), pinnbuf+ss*Cmp, Cmp*sizeof(double));
+					//cublasGetMatrix(Cmp, Cnq-K, sizeof(double), dC, Cmp, Mptr(C, Cii, Cjj+K, Cld, size), Cld);
 
 					TESTING_DEVFREE(dA);
 					TESTING_DEVFREE(dB);
@@ -397,10 +403,6 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 					TESTING_HOSTALLOC(phA, double, Cmp*K);
 					Copy_to_pinn
 					
-					
-
-					
-
 					// tranfer the non-next-panel data to GPU asyn
 					cudaMemcpy2DAsync	(dA, Cmp, WA, WAd0[LLD_],
 							Cmp, K, cudaMemcpyHostToDevice, fstream);	

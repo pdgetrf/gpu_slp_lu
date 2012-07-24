@@ -10,7 +10,12 @@
 		http://www.netlib.org/f2c/libf2c.zip
 */
 
+#include "stdlib.h"
+#include "stdio.h"
 #include "f2c.h"
+#include "util_gpu.h"
+
+
 
 /* Table of constant values */
 
@@ -39,8 +44,8 @@ static int c_n1 = -1;
     extern /* Subroutine */ int gpu_pdgemm_(char *, char *, int *, int *, 
 	    int *, double *, double *, int *, int *, 
 	    int *, double *, int *, int *, int *, 
-	    double *, double *, int *, int *, int *, 
-	    ftnlen, ftnlen), blacs_gridinfo__(int *, int *, int *,
+	    double *, double *, int *, int *, int *, double *), 
+	    blacs_gridinfo__(int *, int *, int *,
 	     int *, int *), gpu_pdtrsm_(char *, char *, char *, char *, 
 	    int *, int *, double *, double *, int *, 
 	    int *, int *, double *, int *, int *, int 
@@ -281,6 +286,24 @@ static int c_n1 = -1;
 /*     Factor diagonal and subdiagonal blocks and test for exact */
 /*     singularity. */
 
+#define GPU
+#ifdef GPU
+	//-------- allocate pinned buffer ---------//
+	int	izero = 0;
+	i__1 = *m;
+	int mpc = numroc_(&i__1, &desca[5], &myrow, &izero, &nprow);
+	i__1 = *n;
+	int nqc = numroc_(&i__1, &desca[6], &mycol, &izero, &npcol);
+	
+//	printf ("(%d,%d) mpc=%d, nqc=%d, desca[5]=%d, 6=%d\n", myrow, mycol, mpc, nqc, desca[5], desca[6]);
+	double *pinnbuf=NULL;
+	if (mpc*nqc>0)
+	{
+		TESTING_HOSTALLOC(pinnbuf, double, mpc*nqc);
+	}
+#endif
+					
+
     pdgetf2_(m, &jb, &a[1], ia, ja, &desca[1], &ipiv[1], info);
 
     if (jb + 1 <= *n) 
@@ -315,7 +338,7 @@ static int c_n1 = -1;
 			// xxx
 			gpu_pdgemm_("No transpose", "No transpose", &i__1, &i__2, &jb, &c_b34,
 					&a[1], &i__3, ja, &desca[1], &a[1], ia, &i__4, &desca[1],
-					&c_b31, &a[1], &i__5, &i__6, &desca[1], (ftnlen)12, (ftnlen)12);
+					&c_b31, &a[1], &i__5, &i__6, &desca[1], pinnbuf);
 
 		}
 	}
@@ -379,8 +402,7 @@ static int c_n1 = -1;
 				i__8 = j + jb;
 				gpu_pdgemm_("No transpose", "No transpose", &i__3, &i__4, &jb, &
 						c_b34, &a[1], &i__5, &j, &desca[1], &a[1], &i__, &
-						i__6, &desca[1], &c_b31, &a[1], &i__7, &i__8, &desca[
-						1], (ftnlen)12, (ftnlen)12);
+						i__6, &desca[1], &c_b31, &a[1], &i__7, &i__8, &desca[1], pinnbuf);
 
 			}
 		}
@@ -402,6 +424,13 @@ static int c_n1 = -1;
 	    ftnlen)10, (ftnlen)1);
     pb_topset__(&ictxt, "Combine", "Columnwise", colctop, (ftnlen)7, (ftnlen)
 	    10, (ftnlen)1);
+	
+#ifdef GPU
+	if (mpc*nqc>0)
+	{
+		TESTING_HOSTFREE(pinnbuf);
+	}
+#endif
 
     return 0;
 
