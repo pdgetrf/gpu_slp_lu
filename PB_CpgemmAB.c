@@ -292,8 +292,10 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 	 *  .. Executable Statements ..
 	 *
 	 */
+	/*
 	static cudaStream_t fstream;
 	cudaStreamCreate(&fstream);
+	*/
 	/*
 	 *  Retrieve process grid information
 	 */
@@ -473,7 +475,7 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 		}
 		if( WAfr ) free( WA );
 		if( WBfr ) free( WB );
-		cudaStreamDestroy(fstream);
+		//cudaStreamDestroy(fstream);
 		return;
 	}
 	  

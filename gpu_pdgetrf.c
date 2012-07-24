@@ -389,7 +389,7 @@ static int c_n1 = -1;
 				int mmpc = mpc-iic;
 				cudaStreamSynchronize (0); 	
 				int ss=0;
-				#pragma omp parallel for default(none) private(ss)
+				#pragma omp parallel for default(shared) private(ss)
 				for (ss=0; ss<(Cnq-Kb); ss++)
 					memcpy (&a[1]+(jjc+desca[5]+ss)*mpc+iic, pinnbuf+ss*mmpc, mmpc*sizeof(double));
 			}

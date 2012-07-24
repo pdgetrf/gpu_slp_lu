@@ -16,7 +16,7 @@ CUDADIR   = /mnt/scratch/cuda
 INC       = -I$(CUDADIR)/include 
 
 
-CFLAGS = -I/opt/mkl/include -I/opt/cuda/include -Wall -I/home/du/lib/scalapack-1.8.0/PBLAS/SRC -I/home/du/lib/scalapack-1.8.0/PBLAS/SRC/PTOOLS
+CFLAGS = -I/opt/mkl/include -I/opt/cuda/include -Wall -I/home/du/lib/scalapack-1.8.0/PBLAS/SRC -I/home/du/lib/scalapack-1.8.0/PBLAS/SRC/PTOOLS -fopenmp
 #CFLAGS += -DTIMING
 FFLAGS =  -fsecond-underscore
 
