@@ -1,0 +1,1 @@
+CPU resident version. use look-ahead to hide GPU data copy. lookahead panel is transferred using asyn copy 
