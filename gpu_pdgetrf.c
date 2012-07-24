@@ -390,6 +390,7 @@ static int c_n1 = -1;
 //				printf ("(%d,%d), i__=%d, j=%d, m=%d, n=%d, lda=%d\n", myrow, mycol, i__, j, mmpc, Cnq-desca[5], mpc);
 				cudaStreamSynchronize (0); 	
 				int ss=0;
+				#pragma omp parallel for default(none) private(ss)
 				for (ss=0; ss<(Cnq-Kb); ss++)
 					memcpy (&a[1]+(jjc+desca[5]+ss)*mpc+iic, pinnbuf+ss*mmpc, mmpc*sizeof(double));
 			}
