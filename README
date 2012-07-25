@@ -1,1 +1,26 @@
 CPU resident version. use look-ahead to hide GPU data copy. lookahead panel is transferred using asyn copy 
+
+[du@dancer lu]$ !mpi
+mpiexec -np 12 -hostfile ./hostfile --bynode -x OMP_NUM_THREADS=8 -x LD_LIBRARY_PATH -x PATH ./lu_test.x -p 4 -q 3 -r 5000 50000 5000 -nb 100
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 3071.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2050 / C2070, 1147.0 MHz clock, 2687.2 MB memory, capability 2.0
+device 0: Tesla C2070, 1147.0 MHz clock, 5375.2 MB memory, capability 2.0
+device 0: Tesla C2070, 1147.0 MHz clock, 5375.2 MB memory, capability 2.0
+device 0: Tesla C2070, 1147.0 MHz clock, 5375.2 MB memory, capability 2.0
+device 0: Tesla C2070, 1147.0 MHz clock, 5375.2 MB memory, capability 2.0
+done setting up MPI and BLACS, nprow=4, npcol=3, NB=100
+M		GFlop/s (r)		GFlop/s (n)		Perc		resid		who failed
+5000		43.329456		84.306405		-48.6		4.236418e-18		X
+10000		31.685485		23.052578		37.4		4.030502e-18		X
+15000		43.490563		44.337902		-1.9		3.886960e-18		X
+20000		72.702168		68.819953		5.6			3.767073e-18		X
+25000		93.257176		105.737845		-11.8		3.699515e-18		X
+30000		112.704960		127.761269		-11.8		3.645412e-18		X
+35000		142.323479		169.326319		-15.9		3.594786e-18		X
+40000		159.724754		204.259801		-21.8		3.562792e-18		X
