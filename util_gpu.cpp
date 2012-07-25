@@ -2,6 +2,42 @@
 #include "stdio.h"
 
 extern "C"
+{
+	void infog2l_ (int *GRINDX, int *GCINDX, int *DESC, int *NPROW, int *NPCOL, int *MYROW, int *MYCOL, 
+			int *LRINDX, int *LCINDX, int *RSRC, int *CSRC );
+	int numroc_(int * N, int * NB, int * IPROC, int * ISRCPROC, int * NPROCS );
+	extern void blacs_gridinfo__(int *, int *, int *, int *, int *);
+}
+
+extern "C"
+void Load_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,
+						double *dA, int *descA2, cudaStream_t fstream)
+{
+	int iic, jjc, icrow, iccol;
+	int izero = 0, ione = 1;
+    int ictxt = descA[1];
+	int nb = descA[4];
+
+	int nprow, npcol, myrow, mycol;
+    blacs_gridinfo__(&ictxt, &nprow, &npcol, &myrow, &mycol);
+
+	int x_ = i-nb;
+	int y_ = j+nb;
+	infog2l_(&x_, &y_, descA2, &nprow, &npcol, &myrow, &mycol, 
+			&iic, &jjc, &icrow, &iccol);
+	iic--;	jjc--;
+
+	/*
+	x_ = descA[2];
+	int mpc = numroc_(&i__1, &descC2[4], &myrow, &izero, &nprow);
+	x_ = descA[3];
+	int nqc = numroc_(&i__1, &descC2[5], &mycol, &ione, &npcol);
+	*/
+
+
+}
+
+extern "C"
 void printout_devices( )
 {
 	int ndevices, idevice;

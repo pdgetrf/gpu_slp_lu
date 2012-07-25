@@ -176,6 +176,7 @@ int main(int argc, char **argv)
 		{
 			int ipiv_len = numroc_( &M, &nb, &myrow, &izero, &nprow ) + nb;
 			ipiv = (int *)malloc(ipiv_len*sizeof(int));
+			memset (ipiv, 0, ipiv_len*sizeof(int));
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			MPIt1 = MPI_Wtime();
@@ -207,6 +208,7 @@ int main(int argc, char **argv)
 		{
 			int ipiv_len = numroc_( &M, &nb, &myrow, &izero, &nprow ) + nb;
 			ipiv = (int *)malloc(ipiv_len*sizeof(int));
+			memset (ipiv, 0, ipiv_len*sizeof(int));
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			MPIt1 = MPI_Wtime();

@@ -215,6 +215,8 @@ static int c_n1 = -1;
 /*     .. Intrinsic Functions .. */
 /*     .. */
 /*     .. Executable Statements .. */
+	static cudaStream_t fstream;
+	cudaStreamCreate(&fstream);
 
 /*     Get grid parameters */
 
@@ -278,6 +280,47 @@ static int c_n1 = -1;
 	     (ftnlen)1);
     pb_topset__(&ictxt, "Combine", "Columnwise", " ", (ftnlen)7, (ftnlen)10, (
 	    ftnlen)1);
+	
+	// allocate memory on GPU for V and A2 and W
+	double *dA2=NULL, *dC2=NULL, *dB2=NULL;
+	int ic, jc, iic, jjc, icrow, iccol; 
+	int lda = desca[9];
+	ic = 1;
+	jc = 1 + desca[5];
+	infog2l_(&ic, &jc, &desca[1], &nprow, &npcol, &myrow, &mycol, 
+									&iic, &jjc, &icrow, &iccol);
+	iic--;	jjc--;
+	
+	int descC2[9];
+	int n_A2 = *n - desca[5];
+	int izero = 0, ione = 1;
+	descinit_ (descC2, m, &n_A2, &desca[5], &desca[5], &izero, &ione, &ictxt, &lda, &iinfo);
+	if (iinfo!=0)
+	{
+		printf ("error at descinit_, %d, %s\n", __LINE__, __FILE__);
+		exit(0);
+	}
+
+	i__1 = *m;
+	int mpc = numroc_(&i__1, &descC2[4], &myrow, &izero, &nprow);
+	i__1 = *n-descC2[4];
+	int nqc = numroc_(&i__1, &descC2[5], &mycol, &ione, &npcol);
+	
+	double *pinnbuf=NULL;
+	if (mpc*nqc>0)
+	{
+		//printf ("\n(%d,%d) mpc=%d, nqc=%d, ldc=%d\n", myrow, mycol, mpc, nqc, lda);
+		TESTING_DEVALLOC (dC2, double, mpc*nqc);
+		TESTING_DEVALLOC (dB2, double, nqc*descC2[5]);
+		TESTING_DEVALLOC (dC2, double, mpc*descC2[5]);
+//		TESTING_HOSTALLOC(pinnbuf, double, mpc*descC2[5]);
+
+		//cublasSetMatrix(mpc, nqc, sizeof(double), &a[jjc*lda+iic+1], lda, A2, lda);
+		
+		//upload matrix to GPU
+		cudaMemcpyAsync	(dC2, &a[jjc*lda+iic+1],
+				mpc*nqc*sizeof(double), cudaMemcpyHostToDevice, fstream);
+	}
 
 /*     Handle the first block of columns separately */
 
@@ -293,36 +336,22 @@ static int c_n1 = -1;
 /*     Factor diagonal and subdiagonal blocks and test for exact */
 /*     singularity. */
 
-#define GPU
-#ifdef GPU
-	//-------- allocate pinned buffer ---------//
-	int	izero = 0;
-	i__1 = *m;
-	int mpc = numroc_(&i__1, &desca[5], &myrow, &izero, &nprow);
-	i__1 = *n;
-	int nqc = numroc_(&i__1, &desca[6], &mycol, &izero, &npcol);
-	
-
-	// allocate A, B and C on GPU
-	int Kb = desca[5];
-	TESTING_DEVALLOC (dA, double, mpc*Kb);
-	TESTING_DEVALLOC (dB, double, Kb*nqc);
-	TESTING_DEVALLOC (dC, double, mpc*nqc);
-	
-//	printf ("(%d,%d) mpc=%d, nqc=%d, desca[5]=%d, 6=%d\n", myrow, mycol, mpc, nqc, desca[5], desca[6]);
-	double *pinnbuf=NULL;
-	if (mpc*nqc>0)
-	{
-		TESTING_HOSTALLOC(pinnbuf, double, mpc*nqc);
-	}
-#endif
-
     pdgetf2_(m, &jb, &a[1], ia, ja, &desca[1], &ipiv[1], info);
+	
+	/*
+	int xi, xj;
+	for (xi=0; xi<mpc+desca[5]; xi++)
+		printf ("\n(%d,%d): ipiv[%d]=%d\n", myrow, mycol, xi, ipiv[1+xi]);
+		*/
+	
+	cudaStreamSynchronize	(fstream); 	
 
     if (jb + 1 <= *n) 
 	{
 
 		/*        Apply interchanges to columns JN+1:JA+N-1. */
+
+		Load_for_Pivoting (&a[1], ia, ja, &desca[1], &ipiv[1], dC2, descC2, fstream);
 
 		i__1 = *n - jb;
 		i__2 = jn + 1;
@@ -375,7 +404,6 @@ static int c_n1 = -1;
 
 		/*
 		 * copy the result of last trailing update (non-lookahead part) 
-		 */
 		int iic, jjc, icrow, iccol; 
 		infog2l_(&i__, &j, &desca[1], &nprow, &npcol, &myrow, &mycol, 
 				&iic, &jjc, &icrow, &iccol);
@@ -394,6 +422,7 @@ static int c_n1 = -1;
 					memcpy (&a[1]+(jjc+desca[5]+ss)*mpc+iic, pinnbuf+ss*mmpc, mmpc*sizeof(double));
 			}
 		}
+		 */
 
 		if (*info == 0 && iinfo > 0) {
 			*info = iinfo + j - *ja;
@@ -460,15 +489,15 @@ static int c_n1 = -1;
     pb_topset__(&ictxt, "Combine", "Columnwise", colctop, (ftnlen)7, (ftnlen)
 	    10, (ftnlen)1);
 	
-#ifdef GPU
+	/* free gpu memory */
 	if (mpc*nqc>0)
 	{
-		TESTING_HOSTFREE(pinnbuf);
+		//TESTING_HOSTFREE(pinnbuf);
+		TESTING_DEVFREE(dA2);
+		TESTING_DEVFREE(dB2);
+		TESTING_DEVFREE(dC2);
 	}
-	TESTING_DEVFREE(dA);
-	TESTING_DEVFREE(dB);
-	TESTING_DEVFREE(dC);
-#endif
+	cudaStreamDestroy(fstream);
 
     return 0;
 
