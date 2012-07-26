@@ -356,7 +356,7 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 			/*
 			 *  Perform the local update if I own some of sub( C )
 			 */
-#define GPU
+//#define GPU
 #ifdef GPU
 			int IIC=IC+1, JJC=JC+1, iiA2, jjA2, icrow, iccol;
 			infog2l_(&IIC, &JJC, descC, &nprow, &npcol, &myrow, &mycol, 

@@ -312,14 +312,16 @@ static int c_n1 = -1;
 		//printf ("\n(%d,%d) mpc=%d, nqc=%d, ldc=%d\n", myrow, mycol, mpc, nqc, lda);
 		TESTING_DEVALLOC (dC2, double, mpc*nqc);
 		TESTING_DEVALLOC (dB2, double, nqc*descC2[5]);
-		TESTING_DEVALLOC (dC2, double, mpc*descC2[5]);
+		TESTING_DEVALLOC (dA2, double, mpc*descC2[5]);
 //		TESTING_HOSTALLOC(pinnbuf, double, mpc*descC2[5]);
 
-		//cublasSetMatrix(mpc, nqc, sizeof(double), &a[jjc*lda+iic+1], lda, A2, lda);
+		cublasStatus r=cublasSetMatrix(mpc, nqc, sizeof(double), &a[jjc*lda+iic+1], mpc, dC2, mpc);
+		if (r!=CUBLAS_STATUS_SUCCESS)
+			printf ("cublasSetMatrix error\n");
 		
 		//upload matrix to GPU
-		cudaMemcpyAsync	(dC2, &a[jjc*lda+iic+1],
-				mpc*nqc*sizeof(double), cudaMemcpyHostToDevice, fstream);
+		//cudaMemcpyAsync	(dC2, &a[jjc*lda+iic+1],
+		//		mpc*nqc*sizeof(double), cudaMemcpyHostToDevice, fstream);
 	}
 
 /*     Handle the first block of columns separately */
@@ -344,14 +346,15 @@ static int c_n1 = -1;
 		printf ("\n(%d,%d): ipiv[%d]=%d\n", myrow, mycol, xi, ipiv[1+xi]);
 		*/
 	
-	cudaStreamSynchronize	(fstream); 	
+	//cudaStreamSynchronize	(fstream); 	
 
     if (jb + 1 <= *n) 
 	{
 
 		/*        Apply interchanges to columns JN+1:JA+N-1. */
 
-		Load_for_Pivoting (&a[1], ia, ja, &desca[1], &ipiv[1], dC2, descC2, fstream);
+		Load_for_Pivoting (&a[1], *ia, *ja, &desca[1], &ipiv[1], dC2, descC2, fstream);
+		//cudaStreamSynchronize	(fstream); 	
 
 		i__1 = *n - jb;
 		i__2 = jn + 1;
@@ -365,6 +368,8 @@ static int c_n1 = -1;
 		gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__1, &c_b31, &
 				a[1], ia, ja, &desca[1], &a[1], ia, &i__2, &desca[1], (ftnlen)
 				4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
+		
+		//cudaStreamSynchronize	(fstream); 	
 
 		if (jb + 1 <= *m) 
 		{
@@ -381,8 +386,8 @@ static int c_n1 = -1;
 			gpu_pdgemm_("No transpose", "No transpose", &i__1, &i__2, &jb, &c_b34,
 					&a[1], &i__3, ja, &desca[1], &a[1], ia, &i__4, &desca[1],
 					&c_b31, &a[1], &i__5, &i__6, &desca[1], pinnbuf);
-
 		}
+		Save_for_Pivoting (&a[1], *ia, *ja, &desca[1], &ipiv[1], dC2, descC2, fstream);
 	}
 
 /*     Loop over the remaining blocks of columns. */
@@ -402,38 +407,19 @@ static int c_n1 = -1;
 		i__3 = *m - j + *ja;
 		pdgetf2_(&i__3, &jb, &a[1], &i__, &j, &desca[1], &ipiv[1], &iinfo);
 
-		/*
-		 * copy the result of last trailing update (non-lookahead part) 
-		int iic, jjc, icrow, iccol; 
-		infog2l_(&i__, &j, &desca[1], &nprow, &npcol, &myrow, &mycol, 
-				&iic, &jjc, &icrow, &iccol);
-		iic--;	jjc--;
-
-		if (mycol==iccol)
-		{
-			int Cnq = nqc - jjc; 
-			if (Cnq-desca[5]>0)
-			{
-				int mmpc = mpc-iic;
-				cudaStreamSynchronize (0); 	
-				int ss=0;
-				#pragma omp parallel for default(shared) private(ss)
-				for (ss=0; ss<(Cnq-Kb); ss++)
-					memcpy (&a[1]+(jjc+desca[5]+ss)*mpc+iic, pinnbuf+ss*mmpc, mmpc*sizeof(double));
-			}
-		}
-		 */
-
 		if (*info == 0 && iinfo > 0) {
 			*info = iinfo + j - *ja;
 		}
 
 		/*        Apply interchanges to columns JA:J-JA. */
 
+		Load_for_Pivoting (&a[1], i__, j, &desca[1], &ipiv[1], dC2, descC2, fstream);
 		i__3 = j - *ja;
 		i__4 = i__ + jb - 1;
 		pdlaswp_("Forward", "Rowwise", &i__3, &a[1], ia, ja, &desca[1], &i__, 
 				&i__4, &ipiv[1], (ftnlen)7, (ftnlen)7);
+		
+		//cudaStreamSynchronize	(fstream); 	
 
 		if (j - *ja + jb + 1 <= *n) 
 		{
@@ -453,6 +439,7 @@ static int c_n1 = -1;
 			gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__3, &
 					c_b31, &a[1], &i__, &j, &desca[1], &a[1], &i__, &i__4, &
 					desca[1], (ftnlen)4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
+			
 
 			if (j - *ja + jb + 1 <= *m) 
 			{
@@ -469,6 +456,7 @@ static int c_n1 = -1;
 						i__6, &desca[1], &c_b31, &a[1], &i__7, &i__8, &desca[1], pinnbuf);
 
 			}
+			Save_for_Pivoting (&a[1], i__, j, &desca[1], &ipiv[1], dC2, descC2, fstream);
 		}
 		/* L10: */
 	}

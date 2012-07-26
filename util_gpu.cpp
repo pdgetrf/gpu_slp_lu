@@ -1,5 +1,6 @@
 #include "util_gpu.h"
 #include "stdio.h"
+#include "string.h"
 
 extern "C"
 {
@@ -13,7 +14,7 @@ extern "C"
 void Load_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,
 						double *dA, int *descA2, cudaStream_t fstream)
 {
-	int iic, jjc, icrow, iccol;
+	int diic, djjc, iic, jjc, icrow, iccol;
 	int izero = 0, ione = 1;
     int ictxt = descA[1];
 	int nb = descA[4];
@@ -21,20 +22,93 @@ void Load_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,
 	int nprow, npcol, myrow, mycol;
     blacs_gridinfo__(&ictxt, &nprow, &npcol, &myrow, &mycol);
 
-	int x_ = i-nb;
+	int mpc = numroc_(&descA[2], &descA[4], &myrow, &izero, &nprow);
+	int nqc = numroc_(&descA[3], &descA[5], &mycol, &izero, &npcol);
+
+	int dmpc = numroc_(&descA2[2], &descA2[4], &myrow, &izero, &nprow);
+	int dnqc = numroc_(&descA2[3], &descA2[5], &mycol, &ione, &npcol);
+	
+	int x_ = i;
 	int y_ = j+nb;
-	infog2l_(&x_, &y_, descA2, &nprow, &npcol, &myrow, &mycol, 
+	infog2l_(&x_, &y_, descA, &nprow, &npcol, &myrow, &mycol, 
 			&iic, &jjc, &icrow, &iccol);
 	iic--;	jjc--;
+	//int xx = mpc-iic;
+	//int yy = nqc-jjc;
+
+	infog2l_(&i, &j, descA2, &nprow, &npcol, &myrow, &mycol, 
+			&diic, &djjc, &icrow, &iccol);
+	diic--;	djjc--;
+	int dx = dmpc-diic;
+	int dy = dnqc-djjc;
+
+	int lda = descA[8];
+	int ldda = descA2[8];
+
+	//printf ("(%d,%d): mpc=%d, nqc=%d, dmpc=%d, dnqc=%d, xx=%d, yy=%d, dx=%d, dy=%d\n", myrow, mycol, mpc, nqc, dmpc, dnqc, xx, yy, dx, dy);
+	
+	if (dx*dy>0)
+	{
+		cublasStatus r=	cublasGetMatrix(dx, dy, sizeof(double), dA+djjc*ldda+diic, ldda, &A[jjc*lda+iic], lda);
+		if (r!=CUBLAS_STATUS_SUCCESS)
+			printf ("cublasStatus error\n");
+	}
 
 	/*
-	x_ = descA[2];
-	int mpc = numroc_(&i__1, &descC2[4], &myrow, &izero, &nprow);
-	x_ = descA[3];
-	int nqc = numroc_(&i__1, &descC2[5], &mycol, &ione, &npcol);
-	*/
+	cudaMemcpyAsync	(&A[jjc*descA[8]+iic],dA+djjc*descA2[8], 
+			dx*dy*sizeof(double), cudaMemcpyDeviceToHost, fstream);
+		*/
+}
 
+extern "C"
+void Save_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,
+						double *dA, int *descA2, cudaStream_t fstream)
+{
+	int diic, djjc, iic, jjc, icrow, iccol;
+	int izero = 0, ione = 1;
+    int ictxt = descA[1];
+	int nb = descA[4];
 
+	int nprow, npcol, myrow, mycol;
+    blacs_gridinfo__(&ictxt, &nprow, &npcol, &myrow, &mycol);
+
+	int mpc = numroc_(&descA[2], &descA[4], &myrow, &izero, &nprow);
+	int nqc = numroc_(&descA[3], &descA[5], &mycol, &izero, &npcol);
+
+	int dmpc = numroc_(&descA2[2], &descA2[4], &myrow, &izero, &nprow);
+	int dnqc = numroc_(&descA2[3], &descA2[5], &mycol, &ione, &npcol);
+	
+	int x_ = i;
+	int y_ = j+nb;
+	infog2l_(&x_, &y_, descA, &nprow, &npcol, &myrow, &mycol, 
+			&iic, &jjc, &icrow, &iccol);
+	iic--;	jjc--;
+	//int xx = mpc-iic;
+	//int yy = nqc-jjc;
+
+	infog2l_(&i, &j, descA2, &nprow, &npcol, &myrow, &mycol, 
+			&diic, &djjc, &icrow, &iccol);
+	diic--;	djjc--;
+	int dx = dmpc-diic;
+	int dy = dnqc-djjc;
+
+	int lda = descA[8];
+	int ldda = descA2[8];
+
+	//printf ("(%d,%d): mpc=%d, nqc=%d, dmpc=%d, dnqc=%d, xx=%d, yy=%d, dx=%d, dy=%d\n", myrow, mycol, mpc, nqc, dmpc, dnqc, xx, yy, dx, dy);
+	
+	if (dx*dy>0)
+	{
+		cublasStatus r=	cublasSetMatrix(dx, dy, sizeof(double), &A[jjc*lda+iic], lda, dA+djjc*ldda+diic, ldda);
+		if (r!=CUBLAS_STATUS_SUCCESS)
+			printf ("cublasStatus error\n");
+	}
+
+	/*
+	cudaMemcpyAsync	(dA+djjc*descA2[8], &A[jjc*descA[8]+iic], 
+			dx*dy*sizeof(double), cudaMemcpyHostToDevice, fstream);
+			*/
+	
 }
 
 extern "C"
