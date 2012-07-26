@@ -15,6 +15,7 @@
 #include "string.h"
 #include "f2c.h"
 #include "util_gpu.h"
+#include "mpi.h"
 
 extern void infog2l_ (int *GRINDX, int *GCINDX, int *DESC, int *NPROW, int *NPCOL, int *MYROW, int *MYCOL, 
 					   int *LRINDX, int *LCINDX, int *RSRC, int *CSRC );
@@ -22,6 +23,15 @@ extern int numroc_(int * N, int * NB, int * IPROC, int * ISRCPROC, int * NPROCS 
 
 
 double *dA, *dB, *dC;
+
+#define TIMING
+#ifdef TIMING
+  double t1 = 0.0f; double t2 = 0.0f; double tswap = 0.0f; double tload = 0.0f; double tsave = 0.0f; double ttrsm = 0.0f; 
+# define TIME(tt, TEXT ) do { t1 = MPI_Wtime(); TEXT ; t2 = MPI_Wtime(); tt += t2-t1; } while(0)
+#else
+# define TIME(tt, TEXT) TEXT
+#endif
+
 
 
 /* Table of constant values */
@@ -315,15 +325,6 @@ static int c_n1 = -1;
 		TESTING_DEVALLOC (dA, double, mpc*nb);
 //		TESTING_HOSTALLOC(pinnbuf, double, mpc*descC2[5]);
 
-		/*
-		cublasStatus r=cublasSetMatrix(mpc, nqc, sizeof(double), &a[jjc*lda+iic+1], mpc, dC, mpc);
-		if (r!=CUBLAS_STATUS_SUCCESS)
-			printf ("cublasSetMatrix error\n");
-			*/
-		
-		//upload matrix to GPU
-		//cudaMemcpyAsync	(dC, &a[jjc*lda+iic+1],
-		//		mpc*nqc*sizeof(double), cudaMemcpyHostToDevice, fstream);
 	}
 
 /*     Handle the first block of columns separately */
@@ -354,13 +355,17 @@ static int c_n1 = -1;
 
 		/*        Compute block row of U. */
 
+		TIME(tsave,
 		Save_after_Pivoting (&a[1], *ia+nb, *ja+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
+		);
 
 		i__1 = *n - jb;
 		i__2 = jn + 1;
+		TIME(ttrsm,
 		gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__1, &c_b31, &
 				a[1], ia, ja, &desca[1], &a[1], ia, &i__2, &desca[1], (ftnlen)
 				4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
+		);
 		
 		cudaStreamSynchronize	(fstream); 	
 
@@ -392,6 +397,13 @@ static int c_n1 = -1;
 		i__3 = mn - j + *ja;
 		jb = min(i__3,desca[6]);
 		i__ = *ia + j - *ja;
+		
+		if (j - *ja + jb + 1 <= *n) 
+		{
+			TIME(tload,
+			Load_for_Pivoting (&a[1], i__, j+nb, &desca[1], &ipiv[1], dC, descC2, fstream);
+			);
+		}
 
 		/*        Factor diagonal and subdiagonal blocks and test for exact */
 		/*        singularity. */
@@ -405,39 +417,42 @@ static int c_n1 = -1;
 
 		/*        Apply interchanges to columns JA:J-JA. */
 		
-		if (j - *ja + jb + 1 <= *n) 
-		{
-			Load_for_Pivoting (&a[1], i__, j+nb, &desca[1], &ipiv[1], dC, descC2, fstream);
-		}
 
 		i__3 = j - *ja;
 		i__4 = i__ + jb - 1;
+		
+		TIME(tswap, 
 		pdlaswp_("Forward", "Rowwise", &i__3, &a[1], ia, ja, &desca[1], &i__, 
 				&i__4, &ipiv[1], (ftnlen)7, (ftnlen)7);
+			);
 			
 		cudaStreamSynchronize	(fstream); 	
 		
 		if (j - *ja + jb + 1 <= *n) 
 		{
-			//Load_for_Pivoting (&a[1], i__, j+nb, &desca[1], &ipiv[1], dC, descC2, fstream);
 
 			/*           Apply interchanges to columns J+JB:JA+N-1. */
 
 			i__3 = *n - j - jb + *ja;
 			i__4 = j + jb;
 			i__5 = i__ + jb - 1;
+
 			pdlaswp_("Forward", "Rowwise", &i__3, &a[1], ia, &i__4, &desca[1],
 					&i__, &i__5, &ipiv[1], (ftnlen)7, (ftnlen)7);
 
+			TIME(tsave, 
 			Save_after_Pivoting (&a[1], i__+nb, j+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
+			);
 
 			/*           Compute block row of U. */
 
 			i__3 = *n - j - jb + *ja;
 			i__4 = j + jb;
+			TIME(ttrsm,
 			gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__3, &
 					c_b31, &a[1], &i__, &j, &desca[1], &a[1], &i__, &i__4, &
 					desca[1], (ftnlen)4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
+			);
 		
 			cudaStreamSynchronize	(fstream); 	
 			
@@ -486,6 +501,9 @@ static int c_n1 = -1;
 		TESTING_DEVFREE(dC);
 	}
 	cudaStreamDestroy(fstream);
+
+	if (myrow==0 && mycol==0)
+		printf ("tload = %f, tswap =%f || tsave = %f, ttrsm = %f\n", tload, tswap, tsave, ttrsm);
 
     return 0;
 
