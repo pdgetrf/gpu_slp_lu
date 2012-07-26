@@ -347,9 +347,6 @@ static int c_n1 = -1;
 
 		/*        Apply interchanges to columns JN+1:JA+N-1. */
 
-		//Load_for_Pivoting (&a[1], *ia, *ja, &desca[1], &ipiv[1], dC, descC2, fstream);
-		//cudaStreamSynchronize	(fstream); 	
-
 		i__1 = *n - jb;
 		i__2 = jn + 1;
 		pdlaswp_("Forward", "Rows", &i__1, &a[1], ia, &i__2, &desca[1], ia, &
@@ -357,14 +354,15 @@ static int c_n1 = -1;
 
 		/*        Compute block row of U. */
 
+		Save_after_Pivoting (&a[1], *ia+nb, *ja+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
+
 		i__1 = *n - jb;
 		i__2 = jn + 1;
 		gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__1, &c_b31, &
 				a[1], ia, ja, &desca[1], &a[1], ia, &i__2, &desca[1], (ftnlen)
 				4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
 		
-		Save_after_Pivoting (&a[1], *ia+nb, *ja+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
-		//cudaStreamSynchronize	(fstream); 	
+		cudaStreamSynchronize	(fstream); 	
 
 		if (jb + 1 <= *m) 
 		{
@@ -406,17 +404,22 @@ static int c_n1 = -1;
 		}
 
 		/*        Apply interchanges to columns JA:J-JA. */
+		
+		if (j - *ja + jb + 1 <= *n) 
+		{
+			Load_for_Pivoting (&a[1], i__, j+nb, &desca[1], &ipiv[1], dC, descC2, fstream);
+		}
 
 		i__3 = j - *ja;
 		i__4 = i__ + jb - 1;
 		pdlaswp_("Forward", "Rowwise", &i__3, &a[1], ia, ja, &desca[1], &i__, 
 				&i__4, &ipiv[1], (ftnlen)7, (ftnlen)7);
+			
+		cudaStreamSynchronize	(fstream); 	
 		
-		//cudaStreamSynchronize	(fstream); 	
-
 		if (j - *ja + jb + 1 <= *n) 
 		{
-			Load_for_Pivoting (&a[1], i__, j+nb, &desca[1], &ipiv[1], dC, descC2, fstream);
+			//Load_for_Pivoting (&a[1], i__, j+nb, &desca[1], &ipiv[1], dC, descC2, fstream);
 
 			/*           Apply interchanges to columns J+JB:JA+N-1. */
 
@@ -426,6 +429,8 @@ static int c_n1 = -1;
 			pdlaswp_("Forward", "Rowwise", &i__3, &a[1], ia, &i__4, &desca[1],
 					&i__, &i__5, &ipiv[1], (ftnlen)7, (ftnlen)7);
 
+			Save_after_Pivoting (&a[1], i__+nb, j+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
+
 			/*           Compute block row of U. */
 
 			i__3 = *n - j - jb + *ja;
@@ -433,8 +438,9 @@ static int c_n1 = -1;
 			gpu_pdtrsm_("Left", "Lower", "No transpose", "Unit", &jb, &i__3, &
 					c_b31, &a[1], &i__, &j, &desca[1], &a[1], &i__, &i__4, &
 					desca[1], (ftnlen)4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
+		
+			cudaStreamSynchronize	(fstream); 	
 			
-			Save_after_Pivoting (&a[1], i__+nb, j+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
 
 			if (j - *ja + jb + 1 <= *m) 
 			{

@@ -46,9 +46,14 @@ void Load_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,
 	
 	if (dx*dy>0)
 	{
+		/*
 		cublasStatus r=	cublasGetMatrix(dx, dy, sizeof(double), dA+djjc*ldda+diic, ldda, &A[jjc*lda+iic], lda);
 		if (r!=CUBLAS_STATUS_SUCCESS)
 			printf ("cublasStatus error\n");
+			*/
+		
+		cudaMemcpy2DAsync	(&A[jjc*lda+iic], lda*sizeof(double), dA+djjc*ldda+diic, ldda*sizeof(double), 
+					 		 dx*sizeof(double), dy,	cudaMemcpyDeviceToHost, fstream);
 	}
 
 	/*
@@ -94,16 +99,15 @@ void Save_after_Pivoting (double *A, int i, int j, int *descA, int *ipiv,
 //	printf ("(%d,%d): saving %d x %d from C(%d,%d) to G(%d/%d) when i=%d, j=%d, ldda=%d\n", myrow, mycol, dx, dy, iic, jjc, diic, djjc, i, j, ldda);
 	if (dx*dy>0)
 	{
+		/*
 		cublasStatus r=	cublasSetMatrix(dx, dy, sizeof(double), &A[jjc*lda+iic], lda, dA+djjc*ldda+diic, ldda);
 		if (r!=CUBLAS_STATUS_SUCCESS)
 			printf ("cublasStatus error\n");
-	}
-
-	/*
-	cudaMemcpyAsync	(dA+djjc*descA2[8], &A[jjc*descA[8]+iic], 
-			dx*dy*sizeof(double), cudaMemcpyHostToDevice, fstream);
 			*/
 	
+		cudaMemcpy2DAsync	(dA+djjc*ldda+diic, ldda*sizeof(double), &A[jjc*lda+iic], lda*sizeof(double),
+					 		 dx*sizeof(double), dy,	cudaMemcpyHostToDevice, fstream);
+	}
 }
 
 extern "C"
