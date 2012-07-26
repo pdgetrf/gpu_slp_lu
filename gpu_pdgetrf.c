@@ -502,8 +502,10 @@ static int c_n1 = -1;
 	}
 	cudaStreamDestroy(fstream);
 
+#ifdef TIME
 	if (myrow==0 && mycol==0)
 		printf ("tload = %f, tswap =%f || tsave = %f, ttrsm = %f\n", tload, tswap, tsave, ttrsm);
+#endif
 
     return 0;
 
