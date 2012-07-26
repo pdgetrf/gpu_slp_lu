@@ -26,7 +26,7 @@ double *dA, *dB, *dC;
 
 #define TIMING
 #ifdef TIMING
-  double t1 = 0.0f; double t2 = 0.0f; double tswap = 0.0f; double tload = 0.0f; double tsave = 0.0f; double ttrsm = 0.0f; 
+  double t1 = 0.0f, t2 = 0.0f, tswap = 0.0f, tload = 0.0f, tsave = 0.0f, ttrsm = 0.0f, tgf2 = 0.0f, tgemm = 0.0f;  
 # define TIME(tt, TEXT ) do { t1 = MPI_Wtime(); TEXT ; t2 = MPI_Wtime(); tt += t2-t1; } while(0)
 #else
 # define TIME(tt, TEXT) TEXT
@@ -341,7 +341,9 @@ static int c_n1 = -1;
 /*     Factor diagonal and subdiagonal blocks and test for exact */
 /*     singularity. */
 
+	TIME(tgf2, 
     pdgetf2_(m, &jb, &a[1], ia, ja, &desca[1], &ipiv[1], info);
+	);
 
     if (jb + 1 <= *n) 
 	{
@@ -381,9 +383,11 @@ static int c_n1 = -1;
 			i__6 = jn + 1;
 
 			// xxx
+			TIME(tgemm,
 			gpu_pdgemm_("No transpose", "No transpose", &i__1, &i__2, &jb, &c_b34,
 					&a[1], &i__3, ja, &desca[1], &a[1], ia, &i__4, &desca[1],
 					&c_b31, &a[1], &i__5, &i__6, &desca[1], descC2, pinnbuf);
+			);
 		}
 	}
 
@@ -409,7 +413,9 @@ static int c_n1 = -1;
 		/*        singularity. */
 
 		i__3 = *m - j + *ja;
+		TIME(tgf2,
 		pdgetf2_(&i__3, &jb, &a[1], &i__, &j, &desca[1], &ipiv[1], &iinfo);
+		);
 
 		if (*info == 0 && iinfo > 0) {
 			*info = iinfo + j - *ja;
@@ -467,9 +473,12 @@ static int c_n1 = -1;
 				i__6 = j + jb;
 				i__7 = i__ + jb;
 				i__8 = j + jb;
+
+				TIME(tgemm,
 				gpu_pdgemm_("No transpose", "No transpose", &i__3, &i__4, &jb, &
 						c_b34, &a[1], &i__5, &j, &desca[1], &a[1], &i__, &
 						i__6, &desca[1], &c_b31, &a[1], &i__7, &i__8, &desca[1], descC2, pinnbuf);
+				);
 
 			}
 		}
@@ -504,7 +513,7 @@ static int c_n1 = -1;
 
 #ifdef TIME
 	if (myrow==0 && mycol==0)
-		printf ("tload = %f, tswap =%f || tsave = %f, ttrsm = %f\n", tload, tswap, tsave, ttrsm);
+		printf ("tload=%f, tswap =%f || tsave=%f, ttrsm=%f || tgf2=%f, tgemm=%f\n", tload, tswap, tsave, ttrsm, tgf2, tgemm);
 #endif
 
     return 0;
