@@ -30,10 +30,10 @@
 # the value "^localhost" [without the quotes] to the "ras" MCA
 # parameter).  
 
-n1 slots=8
-n2 slots=8
-n3 slots=8
-n4 slots=8
+#n1 slots=8
+#n2 slots=8
+#n3 slots=8
+#n4 slots=8
 n5 slots=8
 n6 slots=8
 n7 slots=8

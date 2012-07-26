@@ -29,7 +29,7 @@ void GPU_PB_CpgemmAB( PBTYP_T * TYPE, char * DIRECA, char * DIRECB,
 		char * TRANSA, char * TRANSB, int M, int N, int K,
 		char * ALPHA, char * A, int IA, int JA, int * DESCA,
 		char * B, int IB, int JB, int * DESCB, char * BETA,
-		char * C, int IC, int JC, int * DESCC, int *descC, double *pinnbuf)	
+		char * C, int IC, int JC, int * DESCC, int *descC, int *descC2, double *pinnbuf)	
 		// added the descC parameter because don't know whe the hell is in DESCC
 #else
 void PB_CpgemmAB( TYPE, DIRECA, DIRECB, TRANSA, TRANSB, M, N, K, ALPHA,
@@ -356,13 +356,12 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 			/*
 			 *  Perform the local update if I own some of sub( C )
 			 */
-//#define GPU
+#define GPU
 #ifdef GPU
 			int IIC=IC+1, JJC=JC+1, iiA2, jjA2, icrow, iccol;
 			infog2l_(&IIC, &JJC, descC, &nprow, &npcol, &myrow, &mycol, 
 					&iiA2, &jjA2, &icrow, &iccol);
-			iiA2--; jjA2--;
-		//	printf ("(%d,%d), iiA=%d\n", myrow, mycol, iiA2);	//??
+			
 			if (mycol==iccol)
 			{
 				/*
@@ -375,68 +374,17 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 					//printf ("(%d,%d): IC=%d, JC=%d, M=%d, N=%d\n", myrow, mycol, IC, JC, Cmp, K);
 
 					// allocate A, B and C on GPU
-					/*
-					TESTING_DEVALLOC (dA, double, Cmp*K);
-					TESTING_DEVALLOC (dB, double, K*(Cnq-K));
-					TESTING_DEVALLOC (dC, double, Cmp*(Cnq-K));
-					*/
 
 					cublasSetMatrix(Cmp, K, sizeof(double), WA, WAd0[LLD_], dA, Cmp);
 					cublasSetMatrix(K, Cnq-K, sizeof(double), Mptr(WB, 0, K, WBd0[LLD_], size), WBd0[LLD_], dB, K);
-					cublasSetMatrix(Cmp, Cnq-K, sizeof(double), Mptr(C, Cii, Cjj+K, Cld, size), Cld, dC, Cmp);
-
-					cublasDgemm(MagmaNoTrans, MagmaNoTrans, Cmp, Cnq-K, K, -1, dA, Cmp, dB, K, 1, dC, Cmp);
-
-					cudaMemcpy2DAsync	(pinnbuf, Cmp*sizeof(double), dC, Cmp*sizeof(double), Cmp*sizeof(double), Cnq-K, cudaMemcpyDeviceToHost, 0);
-					/*
-					cudaStreamSynchronize (0); 	
-					int ss=0;
-					for (ss=0; ss<(Cnq-K); ss++)
-						memcpy (Mptr(C, Cii, Cjj+K+ss, Cld, size), pinnbuf+ss*Cmp, Cmp*sizeof(double));
-					 */
-					//cublasGetMatrix(Cmp, Cnq-K, sizeof(double), dC, Cmp, Mptr(C, Cii, Cjj+K, Cld, size), Cld);
-
-					/*
-					TESTING_DEVFREE(dA);
-					TESTING_DEVFREE(dB);
-					TESTING_DEVFREE(dC);
-					*/
-
-					/*
-					// allocate A, B and C on GPU
-					TESTING_DEVALLOC (dA, double, Cmp*K);
-					TESTING_DEVALLOC (dB, double, K*(Cnq-K));
-					TESTING_DEVALLOC (dC, double, Cmp*(Cnq-K));
-
-					// allocate the pinned memory for data transfer
-					TESTING_HOSTALLOC(phA, double, Cmp*K);
-					Copy_to_pinn
 					
-					// tranfer the non-next-panel data to GPU asyn
-					cudaMemcpy2DAsync	(dA, Cmp, WA, WAd0[LLD_],
-							Cmp, K, cudaMemcpyHostToDevice, fstream);	
+					int dIIC=IC+1, dJJC=JC+1, diiA2, djjA2;
+					infog2l_(&dIIC, &dJJC, descC2, &nprow, &npcol, &myrow, &mycol, 
+							&diiA2, &djjA2, &icrow, &iccol);
+					diiA2--; djjA2--;
+					int ldda = descC2[8];
 
-					cudaMemcpy2DAsync	(dB, K, WB+K*WBd0[LLD_], WBd0[LLD_],
-							K, Cnq-K, cudaMemcpyHostToDevice, fstream);	
-
-					cudaMemcpy2DAsync	(dC, Cmp, Mptr(C,Cii, Cjj+K, Cld, size), Cld,
-							Cmp, Cnq-K, cudaMemcpyHostToDevice, fstream);
-
-					// update the next panel part on CPU
-					TYPE->Fgemm( C2F_CHAR( NOTRAN ), C2F_CHAR( NOTRAN ), &Cmp, &K, &K,
-							ALPHA, WA, &WAd0[LLD_], WB, &WBd0[LLD_], BETA, Mptr( C,
-								Cii, Cjj, Cld, size ), &Cld );
-
-					// update the non-next-panel part on GPU
-					cudaStreamSynchronize	(fstream); 	
-					cublasDgemm(MagmaNoTrans, MagmaNoTrans, Cmp, Cnq-K, K, -1, dA, Cmp,
-							dB, K, 1, dC, Cmp);
-					
-					TESTING_HOSTFREE(phA);
-					TESTING_DEVFREE(dA);
-					TESTING_DEVFREE(dB);
-					TESTING_DEVFREE(dC);
-					*/
+					cublasDgemm(MagmaNoTrans, MagmaNoTrans, Cmp, Cnq-K, K, -1, dA, Cmp, dB, K, 1, dC+djjA2*ldda+diiA2, ldda);
 				}
 				TYPE->Fgemm( C2F_CHAR(NOTRAN), C2F_CHAR(NOTRAN), &Cmp, &K, &K,
 						ALPHA, WA, &WAd0[LLD_], WB, &WBd0[LLD_], BETA, Mptr(C, Cii, Cjj, Cld, size), &Cld );
@@ -444,26 +392,18 @@ char           Aroc, Broc, TrA, TrB, * one, * tbeta, * zero;
 			}
 			else
 			{
-				double *dA, *dB, *dC;
-
-				// allocate A, B and C on GPU
-				TESTING_DEVALLOC (dA, double, Cmp*K);
-				TESTING_DEVALLOC (dB, double, K*Cnq);
-				TESTING_DEVALLOC (dC, double, Cmp*Cnq);
-
+				//printf ("(%d,%d): IC=%d, JC=%d, M=%d, N=%d\n", myrow, mycol, IC, JC, Cmp, K);
+				
 				cublasSetMatrix(Cmp, K, sizeof(double), WA, WAd0[LLD_], dA, Cmp);
 				cublasSetMatrix(K, Cnq, sizeof(double), WB, WBd0[LLD_], dB, K);
-				cublasSetMatrix(Cmp, Cnq, sizeof(double), Mptr(C,Cii, Cjj, Cld, size), Cld, dC, Cmp);
 
-				cublasDgemm(MagmaNoTrans, MagmaNoTrans, Cmp, Cnq, K, -1, dA, Cmp,
-						dB, K,
-						1, dC, Cmp);
-
-				cublasGetMatrix(Cmp, Cnq, sizeof(double), dC, Cmp, Mptr(C,Cii, Cjj, Cld, size), Cld);
-
-				TESTING_DEVFREE(dA);
-				TESTING_DEVFREE(dB);
-				TESTING_DEVFREE(dC);
+				int dIIC=IC+1, dJJC=JC+1, diiA2, djjA2;
+				infog2l_(&dIIC, &dJJC, descC2, &nprow, &npcol, &myrow, &mycol, 
+						&diiA2, &djjA2, &icrow, &iccol);
+				diiA2--; djjA2--;
+				int ldda = descC2[8];
+				
+				cublasDgemm(MagmaNoTrans, MagmaNoTrans, Cmp, Cnq, K, -1, dA, Cmp, dB, K, 1, dC+djjA2*ldda+diiA2, ldda);
 			}
 
 #else

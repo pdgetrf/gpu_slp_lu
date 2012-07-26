@@ -51,7 +51,7 @@ static int c_n1 = -1;
     extern /* Subroutine */ int gpu_pdgemm_(char *, char *, int *, int *, 
 	    int *, double *, double *, int *, int *, 
 	    int *, double *, int *, int *, int *, 
-	    double *, double *, int *, int *, int *, double *), 
+	    double *, double *, int *, int *, int *, int *, double *), 
 	    blacs_gridinfo__(int *, int *, int *,
 	     int *, int *), gpu_pdtrsm_(char *, char *, char *, char *, 
 	    int *, int *, double *, double *, int *, 
@@ -282,7 +282,7 @@ static int c_n1 = -1;
 	    ftnlen)1);
 	
 	// allocate memory on GPU for V and A2 and W
-	double *dA2=NULL, *dC2=NULL, *dB2=NULL;
+	int nb = desca[5];
 	int ic, jc, iic, jjc, icrow, iccol; 
 	int lda = desca[9];
 	ic = 1;
@@ -310,17 +310,19 @@ static int c_n1 = -1;
 	if (mpc*nqc>0)
 	{
 		//printf ("\n(%d,%d) mpc=%d, nqc=%d, ldc=%d\n", myrow, mycol, mpc, nqc, lda);
-		TESTING_DEVALLOC (dC2, double, mpc*nqc);
-		TESTING_DEVALLOC (dB2, double, nqc*descC2[5]);
-		TESTING_DEVALLOC (dA2, double, mpc*descC2[5]);
+		TESTING_DEVALLOC (dC, double, mpc*nqc);
+		TESTING_DEVALLOC (dB, double, nqc*nb);
+		TESTING_DEVALLOC (dA, double, mpc*nb);
 //		TESTING_HOSTALLOC(pinnbuf, double, mpc*descC2[5]);
 
-		cublasStatus r=cublasSetMatrix(mpc, nqc, sizeof(double), &a[jjc*lda+iic+1], mpc, dC2, mpc);
+		/*
+		cublasStatus r=cublasSetMatrix(mpc, nqc, sizeof(double), &a[jjc*lda+iic+1], mpc, dC, mpc);
 		if (r!=CUBLAS_STATUS_SUCCESS)
 			printf ("cublasSetMatrix error\n");
+			*/
 		
 		//upload matrix to GPU
-		//cudaMemcpyAsync	(dC2, &a[jjc*lda+iic+1],
+		//cudaMemcpyAsync	(dC, &a[jjc*lda+iic+1],
 		//		mpc*nqc*sizeof(double), cudaMemcpyHostToDevice, fstream);
 	}
 
@@ -339,21 +341,13 @@ static int c_n1 = -1;
 /*     singularity. */
 
     pdgetf2_(m, &jb, &a[1], ia, ja, &desca[1], &ipiv[1], info);
-	
-	/*
-	int xi, xj;
-	for (xi=0; xi<mpc+desca[5]; xi++)
-		printf ("\n(%d,%d): ipiv[%d]=%d\n", myrow, mycol, xi, ipiv[1+xi]);
-		*/
-	
-	//cudaStreamSynchronize	(fstream); 	
 
     if (jb + 1 <= *n) 
 	{
 
 		/*        Apply interchanges to columns JN+1:JA+N-1. */
 
-		Load_for_Pivoting (&a[1], *ia, *ja, &desca[1], &ipiv[1], dC2, descC2, fstream);
+		//Load_for_Pivoting (&a[1], *ia, *ja, &desca[1], &ipiv[1], dC, descC2, fstream);
 		//cudaStreamSynchronize	(fstream); 	
 
 		i__1 = *n - jb;
@@ -369,6 +363,7 @@ static int c_n1 = -1;
 				a[1], ia, ja, &desca[1], &a[1], ia, &i__2, &desca[1], (ftnlen)
 				4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
 		
+		Save_after_Pivoting (&a[1], *ia+nb, *ja+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
 		//cudaStreamSynchronize	(fstream); 	
 
 		if (jb + 1 <= *m) 
@@ -385,9 +380,8 @@ static int c_n1 = -1;
 			// xxx
 			gpu_pdgemm_("No transpose", "No transpose", &i__1, &i__2, &jb, &c_b34,
 					&a[1], &i__3, ja, &desca[1], &a[1], ia, &i__4, &desca[1],
-					&c_b31, &a[1], &i__5, &i__6, &desca[1], pinnbuf);
+					&c_b31, &a[1], &i__5, &i__6, &desca[1], descC2, pinnbuf);
 		}
-		Save_for_Pivoting (&a[1], *ia, *ja, &desca[1], &ipiv[1], dC2, descC2, fstream);
 	}
 
 /*     Loop over the remaining blocks of columns. */
@@ -413,7 +407,6 @@ static int c_n1 = -1;
 
 		/*        Apply interchanges to columns JA:J-JA. */
 
-		Load_for_Pivoting (&a[1], i__, j, &desca[1], &ipiv[1], dC2, descC2, fstream);
 		i__3 = j - *ja;
 		i__4 = i__ + jb - 1;
 		pdlaswp_("Forward", "Rowwise", &i__3, &a[1], ia, ja, &desca[1], &i__, 
@@ -423,6 +416,7 @@ static int c_n1 = -1;
 
 		if (j - *ja + jb + 1 <= *n) 
 		{
+			Load_for_Pivoting (&a[1], i__, j+nb, &desca[1], &ipiv[1], dC, descC2, fstream);
 
 			/*           Apply interchanges to columns J+JB:JA+N-1. */
 
@@ -440,6 +434,7 @@ static int c_n1 = -1;
 					c_b31, &a[1], &i__, &j, &desca[1], &a[1], &i__, &i__4, &
 					desca[1], (ftnlen)4, (ftnlen)5, (ftnlen)12, (ftnlen)4);
 			
+			Save_after_Pivoting (&a[1], i__+nb, j+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
 
 			if (j - *ja + jb + 1 <= *m) 
 			{
@@ -453,10 +448,9 @@ static int c_n1 = -1;
 				i__8 = j + jb;
 				gpu_pdgemm_("No transpose", "No transpose", &i__3, &i__4, &jb, &
 						c_b34, &a[1], &i__5, &j, &desca[1], &a[1], &i__, &
-						i__6, &desca[1], &c_b31, &a[1], &i__7, &i__8, &desca[1], pinnbuf);
+						i__6, &desca[1], &c_b31, &a[1], &i__7, &i__8, &desca[1], descC2, pinnbuf);
 
 			}
-			Save_for_Pivoting (&a[1], i__, j, &desca[1], &ipiv[1], dC2, descC2, fstream);
 		}
 		/* L10: */
 	}
@@ -481,9 +475,9 @@ static int c_n1 = -1;
 	if (mpc*nqc>0)
 	{
 		//TESTING_HOSTFREE(pinnbuf);
-		TESTING_DEVFREE(dA2);
-		TESTING_DEVFREE(dB2);
-		TESTING_DEVFREE(dC2);
+		TESTING_DEVFREE(dA);
+		TESTING_DEVFREE(dB);
+		TESTING_DEVFREE(dC);
 	}
 	cudaStreamDestroy(fstream);
 

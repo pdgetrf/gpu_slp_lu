@@ -98,6 +98,7 @@ FALSE_	f2c.h	30;"	d
 FASTBLASLIB	makefile	/^FASTBLASLIB = -L$(MKLROOT)\/lib\/intel64 -Wl,--start-group -lscalapack $(BLACSLIB)  -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -Wl,--end-group -fopenmp$/;"	m
 FC	makefile	/^FC = mpif77 $/;"	m
 FFLAGS	makefile	/^FFLAGS =  -fsecond-underscore$/;"	m
+GPU	PB_CpgemmAB.c	359;"	d	file:
 GPU	gpu_pdlarfb.c	518;"	d	file:
 GPULIB	makefile	/^GPULIB = -L\/opt\/cuda\/lib64 -lcublas -lcudart -lcuda$/;"	m
 GPU_PB_CpgemmAB	PB_CpgemmAB.c	/^void GPU_PB_CpgemmAB( PBTYP_T * TYPE, char * DIRECA, char * DIRECB,$/;"	f
@@ -209,7 +210,7 @@ S	util_ft.h	/^	double *S;$/;"	m	struct:__anon9
 SETRAN	pmatgeninc.f	/^      SUBROUTINE SETRAN(/;"	s
 S_fp	f2c.h	/^typedef \/* Subroutine *\/ int (*S_fp)();$/;"	t
 S_fp	f2c.h	/^typedef \/* Subroutine *\/ int (*S_fp)(...);$/;"	t
-Save_for_Pivoting	util_gpu.cpp	/^void Save_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,$/;"	f
+Save_after_Pivoting	util_gpu.cpp	/^void Save_after_Pivoting (double *A, int i, int j, int *descA, int *ipiv,$/;"	f
 TAG	util_ft.c	16;"	d	file:
 TAG_L	slp.h	10;"	d
 TAG_L	util_ft.c	14;"	d	file:
