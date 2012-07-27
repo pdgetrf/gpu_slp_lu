@@ -225,6 +225,9 @@ TESTING_HOSTALLOC	util_gpu.h	36;"	d
 TESTING_HOSTFREE	util_gpu.h	51;"	d
 TESTING_MALLOC	util_gpu.h	29;"	d
 THRESHOLD	util_ft.h	11;"	d
+TIME	gpu_pdgetrf.c	30;"	d	file:
+TIME	gpu_pdgetrf.c	32;"	d	file:
+TIMING	gpu_pdgetrf.c	27;"	d	file:
 TRUE_	f2c.h	29;"	d
 U_fp	f2c.h	/^typedef int \/* Unknown procedure type *\/ (*U_fp)();$/;"	t
 U_fp	f2c.h	/^typedef int \/* Unknown procedure type *\/ (*U_fp)(...);$/;"	t
@@ -414,11 +417,19 @@ sun	f2c.h	212;"	d
 sun2	f2c.h	213;"	d
 sun3	f2c.h	214;"	d
 sun4	f2c.h	215;"	d
+t1	gpu_pdgetrf.c	/^  double t1 = 0.0f, t2 = 0.0f, tswap = 0.0f, tload = 0.0f, tsave = 0.0f, ttrsm = 0.0f, tgf2 = 0.0f, tgemm = 0.0f;  $/;"	v
+t2	gpu_pdgetrf.c	/^  double t1 = 0.0f, t2 = 0.0f, tswap = 0.0f, tload = 0.0f, tsave = 0.0f, ttrsm = 0.0f, tgf2 = 0.0f, tgemm = 0.0f;  $/;"	v
 t_Comm	util_ft.h	/^}t_Comm;$/;"	t	typeref:struct:s_Comm
 t_FTKit	util_ft.h	/^}t_FTKit;$/;"	t	typeref:struct:s_FTKit
 t_Grid	util_ft.h	/^}t_Grid;$/;"	t	typeref:struct:s_Grid
 t_checksuite	util_ft.h	/^}t_checksuite;$/;"	t	typeref:struct:__anon9
 tau	util_ft.h	/^	double *tau;$/;"	m	struct:s_FTKit
+tgemm	gpu_pdgetrf.c	/^  double t1 = 0.0f, t2 = 0.0f, tswap = 0.0f, tload = 0.0f, tsave = 0.0f, ttrsm = 0.0f, tgf2 = 0.0f, tgemm = 0.0f;  $/;"	v
+tgf2	gpu_pdgetrf.c	/^  double t1 = 0.0f, t2 = 0.0f, tswap = 0.0f, tload = 0.0f, tsave = 0.0f, ttrsm = 0.0f, tgf2 = 0.0f, tgemm = 0.0f;  $/;"	v
+tload	gpu_pdgetrf.c	/^  double t1 = 0.0f, t2 = 0.0f, tswap = 0.0f, tload = 0.0f, tsave = 0.0f, ttrsm = 0.0f, tgf2 = 0.0f, tgemm = 0.0f;  $/;"	v
+tsave	gpu_pdgetrf.c	/^  double t1 = 0.0f, t2 = 0.0f, tswap = 0.0f, tload = 0.0f, tsave = 0.0f, ttrsm = 0.0f, tgf2 = 0.0f, tgemm = 0.0f;  $/;"	v
+tswap	gpu_pdgetrf.c	/^  double t1 = 0.0f, t2 = 0.0f, tswap = 0.0f, tload = 0.0f, tsave = 0.0f, ttrsm = 0.0f, tgf2 = 0.0f, tgemm = 0.0f;  $/;"	v
+ttrsm	gpu_pdgetrf.c	/^  double t1 = 0.0f, t2 = 0.0f, tswap = 0.0f, tload = 0.0f, tsave = 0.0f, ttrsm = 0.0f, tgf2 = 0.0f, tgemm = 0.0f;  $/;"	v
 type	f2c.h	/^	int  type;$/;"	m	struct:Vardesc
 u370	f2c.h	216;"	d
 u3b	f2c.h	217;"	d

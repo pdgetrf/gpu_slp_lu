@@ -24,7 +24,7 @@ extern int numroc_(int * N, int * NB, int * IPROC, int * ISRCPROC, int * NPROCS 
 
 double *dA, *dB, *dC;
 
-#define TIMING
+//#define TIMING
 #ifdef TIMING
   double t1 = 0.0f, t2 = 0.0f, tswap = 0.0f, tload = 0.0f, tsave = 0.0f, ttrsm = 0.0f, tgf2 = 0.0f, tgemm = 0.0f;  
 # define TIME(tt, TEXT ) do { t1 = MPI_Wtime(); TEXT ; t2 = MPI_Wtime(); tt += t2-t1; } while(0)
@@ -511,7 +511,7 @@ static int c_n1 = -1;
 	}
 	cudaStreamDestroy(fstream);
 
-#ifdef TIME
+#ifdef TIMING
 	if (myrow==0 && mycol==0)
 		printf ("tload=%f, tswap =%f || tsave=%f, ttrsm=%f || tgf2=%f, tgemm=%f\n", tload, tswap, tsave, ttrsm, tgf2, tgemm);
 #endif
