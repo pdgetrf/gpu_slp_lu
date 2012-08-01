@@ -345,6 +345,14 @@ static int c_n1 = -1;
     pdgetf2_(m, &jb, &a[1], ia, ja, &desca[1], &ipiv[1], info);
 	);
 
+	/*
+	 * print out pivoting info
+	int k;
+	for (k=0; k<mpc+jb; k++)
+		printf ("(%d,%d) ipiv[%d]=%d when j=%d\n", myrow, mycol, k, ipiv[1+k], j);
+		*/
+
+
     if (jb + 1 <= *n) 
 	{
 
@@ -416,6 +424,7 @@ static int c_n1 = -1;
 		TIME(tgf2,
 		pdgetf2_(&i__3, &jb, &a[1], &i__, &j, &desca[1], &ipiv[1], &iinfo);
 		);
+	
 
 		if (*info == 0 && iinfo > 0) {
 			*info = iinfo + j - *ja;
