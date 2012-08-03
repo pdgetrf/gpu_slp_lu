@@ -126,6 +126,7 @@ LLD_	util_ft.c	13;"	d	file:
 LMUL	pmatgeninc.f	/^      SUBROUTINE LMUL(/;"	s
 L_fp	f2c.h	/^typedef logical (*L_fp)();$/;"	t
 L_fp	f2c.h	/^typedef logical (*L_fp)(...);$/;"	t
+Load_all_for_Pivoting	util_gpu.cpp	/^void Load_all_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,$/;"	f
 Load_for_Pivoting	util_gpu.cpp	/^void Load_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,$/;"	f
 MAX	util_ft.h	15;"	d
 MB_	slp.h	5;"	d
@@ -211,6 +212,7 @@ SETRAN	pmatgeninc.f	/^      SUBROUTINE SETRAN(/;"	s
 S_fp	f2c.h	/^typedef \/* Subroutine *\/ int (*S_fp)();$/;"	t
 S_fp	f2c.h	/^typedef \/* Subroutine *\/ int (*S_fp)(...);$/;"	t
 Save_after_Pivoting	util_gpu.cpp	/^void Save_after_Pivoting (double *A, int i, int j, int *descA, int *ipiv,$/;"	f
+Save_all_after_Pivoting	util_gpu.cpp	/^void Save_all_after_Pivoting (double *A, int i, int j, int *descA, int *ipiv,$/;"	f
 TAG	util_ft.c	16;"	d	file:
 TAG_L	slp.h	10;"	d
 TAG_L	util_ft.c	14;"	d	file:
@@ -227,7 +229,6 @@ TESTING_MALLOC	util_gpu.h	29;"	d
 THRESHOLD	util_ft.h	11;"	d
 TIME	gpu_pdgetrf.c	30;"	d	file:
 TIME	gpu_pdgetrf.c	32;"	d	file:
-TIMING	gpu_pdgetrf.c	27;"	d	file:
 TRUE_	f2c.h	29;"	d
 U_fp	f2c.h	/^typedef int \/* Unknown procedure type *\/ (*U_fp)();$/;"	t
 U_fp	f2c.h	/^typedef int \/* Unknown procedure type *\/ (*U_fp)(...);$/;"	t

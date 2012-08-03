@@ -352,7 +352,6 @@ static int c_n1 = -1;
 		printf ("(%d,%d) ipiv[%d]=%d when j=%d\n", myrow, mycol, k, ipiv[1+k], j);
 		*/
 
-
     if (jb + 1 <= *n) 
 	{
 
@@ -366,7 +365,7 @@ static int c_n1 = -1;
 		/*        Compute block row of U. */
 
 		TIME(tsave,
-		Save_after_Pivoting (&a[1], *ia+nb, *ja+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
+		Save_all_after_Pivoting (&a[1], *ia+nb, *ja+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
 		);
 
 		i__1 = *n - jb;
@@ -410,13 +409,6 @@ static int c_n1 = -1;
 		jb = min(i__3,desca[6]);
 		i__ = *ia + j - *ja;
 		
-		if (j - *ja + jb + 1 <= *n) 
-		{
-			TIME(tload,
-			Load_for_Pivoting (&a[1], i__, j+nb, &desca[1], &ipiv[1], dC, descC2, fstream);
-			);
-		}
-
 		/*        Factor diagonal and subdiagonal blocks and test for exact */
 		/*        singularity. */
 
@@ -445,6 +437,15 @@ static int c_n1 = -1;
 		
 		if (j - *ja + jb + 1 <= *n) 
 		{
+			TIME(tload,
+			Load_for_Pivoting (&a[1], i__, j, &desca[1], &ipiv[1], dC, descC2, fstream);
+			);
+			/*
+			TIME(tload,
+					Load_all_for_Pivoting (&a[1], i__, j, &desca[1], &ipiv[1], dC, descC2, fstream);
+				);
+			*/
+
 
 			/*           Apply interchanges to columns J+JB:JA+N-1. */
 
@@ -456,7 +457,7 @@ static int c_n1 = -1;
 					&i__, &i__5, &ipiv[1], (ftnlen)7, (ftnlen)7);
 
 			TIME(tsave, 
-			Save_after_Pivoting (&a[1], i__+nb, j+2*nb, &desca[1], &ipiv[1], dC, descC2, fstream);
+			Save_after_Pivoting (&a[1], i__, j, &desca[1], &ipiv[1], dC, descC2, fstream);
 			);
 
 			/*           Compute block row of U. */
