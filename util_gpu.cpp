@@ -54,7 +54,6 @@ void Load_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,
 		int ii;
 		for (ii=0; ii<nb; ii++)
 		{
-		//	printf ("(%d,%d, i=%d, j=%d): ipiv[%d] = %d, dx=%d, dy=%d\n", myrow, mycol, i, j, pii+ii, ipiv[pii+ii], dx, dy); 
 			infog2l_(&ipiv[pii+ii], &j_2nb, descA, &nprow, &npcol, &myrow, &mycol, &iic, &jjc, &icrow, &iccol);
 			iic--;	jjc--;
 
@@ -84,7 +83,6 @@ void Load_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,
 		infog2l_(&i, &j_nb, descA, &nprow, &npcol, &myrow, &mycol, &iic, &jjc, &icrow, &iccol);
 		iic--;	jjc--;
 
-		//printf ("(%d,%d, i=%d, j=%d): dx=%d, dy=%d, iic=%d, jjc=%d\n", myrow, mycol, i, j, dx, dy, iic, jjc); 
 		cublasStatus r=	cublasGetMatrix(dx, dy, sizeof(double), dA+djjc*ldda+diic, ldda, &A[jjc*lda+iic], lda);
 		if (r!=CUBLAS_STATUS_SUCCESS)
 			printf ("cublasStatus error\n");
