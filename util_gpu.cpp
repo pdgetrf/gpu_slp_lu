@@ -45,16 +45,6 @@ void Load_for_Pivoting (double *A, int i, int j, int *descA, int *ipiv,
 
 	if (dx>0 && dy>0)
 	{
-#if 0
-		infog2l_(&i_nb, &j_2nb, descA, &nprow, &npcol, &myrow, &mycol, &iic, &jjc, &icrow, &iccol);
-		iic--;	jjc--;
-
-		printf ("(%d,%d, i=%d, j=%d): dx=%d, dy=%d, iic=%d, jjc=%d\n", myrow, mycol, i, j, dx, dy, iic, jjc); 
-		cublasStatus r=	cublasGetMatrix(dx, dy, sizeof(double), dA+djjc*ldda+diic, ldda, &A[jjc*lda+iic], lda);
-		if (r!=CUBLAS_STATUS_SUCCESS)
-			printf ("cublasStatus error\n");
-#endif
-
 		// get pivoting info location from ipiv
 		infog2l_(&i, &j, descA, &nprow, &npcol, &myrow, &mycol, 
 				&iic, &jjc, &icrow, &iccol);
@@ -218,14 +208,6 @@ void Save_after_Pivoting (double *A, int i, int j, int *descA, int *ipiv,
 	// load data only if I have some trailing matrix to contribute
 	if (dx>0 && dy>0)
 	{
-#if 0
-		infog2l_(&i_nb, &j_2nb, descA, &nprow, &npcol, &myrow, &mycol, &iic, &jjc, &icrow, &iccol);
-		iic--;	jjc--;
-		cublasStatus r=	cublasSetMatrix(dx, dy, sizeof(double), &A[jjc*lda+iic], lda, dA+djjc*ldda+diic, ldda);
-		if (r!=CUBLAS_STATUS_SUCCESS)
-			printf ("cublasStatus error\n");
-#endif
-
 		infog2l_(&i, &j, descA, &nprow, &npcol, &myrow, &mycol, 
 				&iic, &jjc, &icrow, &iccol);
 		int pii = iic-1;

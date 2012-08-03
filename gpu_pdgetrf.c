@@ -440,11 +440,6 @@ static int c_n1 = -1;
 			TIME(tload,
 			Load_for_Pivoting (&a[1], i__, j, &desca[1], &ipiv[1], dC, descC2, fstream);
 			);
-			/*
-			TIME(tload,
-					Load_all_for_Pivoting (&a[1], i__, j, &desca[1], &ipiv[1], dC, descC2, fstream);
-				);
-			*/
 
 
 			/*           Apply interchanges to columns J+JB:JA+N-1. */
